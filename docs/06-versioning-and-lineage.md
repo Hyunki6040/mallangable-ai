@@ -119,9 +119,13 @@ propagate(m, p, r) -> 결과:
   while report.fail and retries_left: report = retry_with_feedback(...)
   if report.fail:              return FAILED       # 이전 릴리스 유지, 관리자 알림
   if delta_permissions(merged) == ∅ and policy(m).apply == auto:
-    apply(merged); emit baseline.applied(m, r);    return APPLIED
+    d = activate(merged)                       # ChangeStore.activate → PDP(E10). gated·파괴적·지문 묶인 승인은 여기서 걸린다
+    if d == 허용: emit baseline.applied(m, r); return APPLIED
+    # 승인 필요·거부면 아래 propose로 내려간다
   propose(merged, summary=explain(diff_of_intents)); return PROPOSED
   # 승인되면 그때 apply → emit baseline.applied(m, r). 거절·만료면 m은 이전 릴리스 유지
+
+`apply`·`activate`는 활성화 판정(5.4, E10)을 건너뛰는 별도 경로가 아닙니다(반드시). 권한 증가가 없어도 활성화 정책이 gated이거나, 파괴적 기능을 쓰거나, "항상" 승인이 바뀐 content_hash에 묶여 있었다면 PDP가 `승인 필요`를 돌려주고 전파는 PROPOSED가 됩니다. `delta_permissions`는 변경 기록의 자기 신고가 아니라 병합 결과의 매니페스트에서 다시 계산합니다.
 
 지원 기간이 끝난 릴리스에 남은 노드: 강제 병합하지 않고 '경고 모드'로 둔다.
 ```

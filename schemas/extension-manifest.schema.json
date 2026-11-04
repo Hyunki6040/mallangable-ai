@@ -38,7 +38,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "allow": { "type": "array", "items": { "type": "string", "pattern": "^(\\*\\.)?[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+$" }, "description": "허용 호스트 목록. 비어 있으면 외부 통신 없음. 맨 '*'처럼 모든 호스트를 여는 값은 허용 목록이 아니므로 거부한다(하위 도메인 와일드카드 '*.example.com'만 허용). 비어 있지 않으면 permissions에 risk=egress 기능이 반드시 있어야 한다. 스키마는 permissions가 비어 있지 않은지만 검사하고, egress 여부는 기능 지도를 보는 준수 검사기가 반드시(MUST) 확인한다" }
+        "allow": { "type": "array", "items": { "type": "string", "pattern": "^(\\*\\.)?([A-Za-z0-9-]+\\.)+[A-Za-z][A-Za-z0-9-]*$" }, "description": "허용 호스트 목록. IP 리터럴(예: 169.254.169.254)은 패턴에서 거부한다(마지막 라벨은 문자로 시작). 공개 접미사 와일드카드(예: *.co.uk)는 스키마로 막을 수 없으므로 준수 검사기가 Public Suffix List로 반드시 거부한다. 비어 있으면 외부 통신 없음. 맨 '*'처럼 모든 호스트를 여는 값은 허용 목록이 아니므로 거부한다(하위 도메인 와일드카드 '*.example.com'만 허용). 비어 있지 않으면 permissions에 risk=egress 기능이 반드시 있어야 한다. 스키마는 permissions가 비어 있지 않은지만 검사하고, egress 여부는 기능 지도를 보는 준수 검사기가 반드시(MUST) 확인한다" }
       }
     },
     "host_api": { "type": "string", "description": "호환되는 기능 지도 버전 범위 (semver range)", "examples": [">=1.2 <2"] },

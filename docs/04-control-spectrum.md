@@ -129,7 +129,7 @@ policy:
   inherits: operator/plan-business      # 요금제도 정책이다
   knobs:
     depth:            { ceiling: D3, default: D2 }
-    capabilities:     { ceiling: [tasks.read, tasks.write, notify.local, net.allowlist] }
+    capabilities:     { ceiling: [tasks.read, tasks.write, notify.local, net.slack.post] }
     network:          { ceiling: allowlist, allowlist: ["hooks.slack.com"] }
     activation:       { ceiling: preview, approver_on_capability_increase: tenant_admin }
     baseline_apply:   { ceiling: auto, default: approve }
@@ -150,17 +150,26 @@ policy:
 ```text
 decide(req):
   p ← effective_policy(req.subject)            # 사슬 위 정책의 교집합 (캐시 가능)
-  if req.action ∈ FLOOR_ACTIONS:                # 되돌리기·세이프 모드·내보내기 등
+  if req.action ∈ FLOOR_ACTIONS and floor_scoped(req):   # 되돌리기·세이프 모드·내보내기 등
       return 허용, 의무=[기록]
+  if req.action == revert:                      # 하한 범위 밖 되돌리기 = 활성화와 같은 판정
+      req ← as_activate(req.target)             # 되살리기·다시 켜기·보류 해제 포함
   for k in knobs_touched(req):
       if value(req, k) ∉ [p.f_k, p.c_k]:
           return 거부, 이유=(k, 상한을 정한 층)   # "테넌트 정책: 최대 깊이 D3"
   if raises_capabilities(req):
       return 승인 필요, 승인자=p.approver_for(req.capabilities_delta)
+  if uses_destructive(req):                     # 파괴적 기능은 활성화 정책과 무관하게 G5 (5.8)
+      return 승인 필요, 승인자=p.gate_approver
   if p.activation(req.depth) == gated:
       return 승인 필요, 승인자=p.gate_approver
   return 허용, 의무=obligations(p, req)         # 예: preview, 감사 기록, 비용 계량
 ```
+
+`floor_scoped(req)`는 다음을 모두 만족할 때만 참입니다(반드시). 하나라도 어기면 하한 행동이 아니라 일반 요청으로 판정합니다.
+- 주체가 대상 레이어를 소유한 **사람**이다(에이전트·감시자·다른 레이어 사용자가 아니다). 감시자의 자동 복구는 권한을 줄이는 방향일 때만 허용하고 기록한다.
+- 되돌리기라면 대상은 같은 레이어의 **이전 상태**이고, 결과의 유효 깊이·권한이 지금 활성 상태와 현재 유효 정책 **안**이다(⊆). 되살리기·"다시 켜기"(5.4)·보류 해제처럼 권한이나 깊이를 다시 늘리는 이동은 활성화(E10)로 판정한다.
+- 세이프 모드는 끄기만 하고, 내보내기는 의도·계약 범위다(F2, F4).
 
 배치 원칙:
 - **권위 있는 PDP는 운영자 경계(서버)에 있다(I8).** 사용자 기기에는 정책 사본을 두어 빠른 안내를 하되, 최종 판정은 서버가 다시 합니다.

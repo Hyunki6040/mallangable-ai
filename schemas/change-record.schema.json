@@ -19,7 +19,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "add": { "type": "array", "items": { "$ref": "#/$defs/capabilityId" }, "description": "늘어난 권한. 하나라도 있으면 G5 approved와 provenance.approved_by가 필요하다 (I4)" },
+        "add": { "type": "array", "items": { "$ref": "#/$defs/capabilityId" }, "description": "늘어난 권한. 하나라도 있으면 G5 approved와 provenance.approved_by가 필요하다 (I4). 이 값은 생성자의 자기 신고이므로, 수신 검사와 PDP는 매니페스트 permissions에서 부모 상태의 유효 권한을 뺀 값으로 다시 계산해 비교해야 한다(반드시, 준수 검사기). approved_by는 그 권한을 가진 사람 주체여야 하며 provenance.agent와 달라야 한다(반드시)" },
         "remove": { "type": "array", "items": { "$ref": "#/$defs/capabilityId" } }
       }
     },
@@ -27,9 +27,9 @@
     "contract": {
       "type": "array",
       "minItems": 1,
-      "description": "계약은 비어 있으면 안 된다 (I2). 병합에서는 추가만 가능 (6.7). 결정적 계약(tree-query·unit·snapshot)이 최소 하나 있어야 한다 (2.5)",
+      "description": "계약은 비어 있으면 안 된다 (I2). 병합에서는 추가만 가능 (6.7). 결정적 계약(tree-query·unit·snapshot)이 최소 하나 있어야 하고, 그중 하나 이상은 실행 가능한 형태(selector·entry·env_ref 등)여야 한다 (2.5). 서술형(contractProse)만으로는 G2를 통과할 수 없다",
       "items": { "$ref": "#/$defs/contractItem" },
-      "contains": { "required": ["check"], "properties": { "check": { "enum": ["tree-query", "unit", "snapshot"] } } }
+      "contains": { "anyOf": [{ "$ref": "#/$defs/contractTreeQuery" }, { "$ref": "#/$defs/contractUnit" }, { "$ref": "#/$defs/contractSnapshot" }] }
     },
     "validation": {
       "type": "object",

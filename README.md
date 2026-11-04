@@ -224,7 +224,7 @@ python3 tools/design_space.py --profile my-product.profile.json
 #   소스를 숨기려면(A5=hidden) 코드를 만지는 에이전트가 서버에 있어야 한다(A3=server)
 ```
 
-결과는 `clean`(권장) · `warned`(경고 `S*`) · `normative`(안전 원칙 위반 `N*`) · `logical`(성립 불가 `L*`) 중 하나이고, 성립하면 사업 모델 20개와의 결합도 함께 나옵니다. 가장 가까운 레퍼런스 프로파일(P1~P7)에서 출발해 한 축씩 바꿔 보는 것이 빠릅니다.
+결과는 `clean`(권장) · `warned`(경고 `S*`) · `normative`(안전 원칙 위반 `N*`) · `logical`(성립 불가 `L*`) 중 하나이고, 성립하면 사업 모델 20개와의 결합도 함께 나옵니다. 종료 코드는 `clean`·`warned`면 0, 그 밖(`normative`·`logical`·입력 오류)이면 1이라 CI 게이트로 바로 쓸 수 있습니다. 중복 키나 객체가 아닌 JSON은 입력 오류로 거부합니다. 가장 가까운 레퍼런스 프로파일(P1~P7)에서 출발해 한 축씩 바꿔 보는 것이 빠릅니다.
 
 ### 3단계: 계산기를 우리 조직에 맞게 고치기
 
@@ -250,6 +250,8 @@ python3 tools/check_schemas.py policy          my-app/policy.yaml
 
 **스키마만으로는 부족합니다.** 문서 사이를 비교해야 하는 규칙(I5 정책 포함 관계, I7 생성자 ≠ 판정자)은 JSON Schema로 표현할 수 없어 `check_schemas.py`가 `ACCEPTED (validator MUST check)`로 표시합니다. 런타임 검증기에서 반드시 따로 검사하세요.
 
+외부에서 받은 문서를 검증할 때를 위해 `check_schemas.py`는 YAML 별칭(`*ref`)과 1 MiB 넘는 파일을 거부하고, 출력의 제어 문자·개행을 이스케이프합니다(문서 키로 터미널 제어 문자나 GitHub Actions `::error::` 주석을 끼워 넣지 못함). 판정은 출력 문구가 아니라 종료 코드(0 통과, 1 실패)로 읽으세요.
+
 ### 5단계: 아키텍처를 내 스택에 대응시키기
 
 - [5장](docs/05-reference-architecture.md)의 포트(`ModelPort`, `SandboxHost`, `PolicyDecisionPoint` …)마다 우리 구현체를 적습니다. 포트 뒤 구현은 자유입니다.
@@ -268,7 +270,8 @@ mallangable-ai/
 ├── LICENSE                    # Apache-2.0 (schemas/, examples/, tools/)
 ├── LICENSE-docs               # CC BY 4.0 (docs/, README 등 문서)
 ├── requirements.txt           # check_schemas.py 의존성
-├── .github/                   # CI(check.yml), 이슈 템플릿
+├── .github/                   # CI(check.yml, 읽기 전용 토큰), 이슈 템플릿
+├── .claude/skills/security-audit/  # Cloudflare 보안 감사 스킬 (MIT, 원본 고정, 수정 금지)
 ├── docs/                      # 명세 본문 (1~10장, 용어집, 참고 문헌)
 ├── schemas/                   # JSON Schema (draft 2020-12)
 │   ├── capability-map.schema.json
@@ -288,6 +291,12 @@ mallangable-ai/
     ├── design_space.py        # 설계 공간 · BM 결합 계산기 (표준 라이브러리만)
     └── check_schemas.py       # 예시 검증 + 금지 문서 거부 회귀 검사 / 내 문서 검증
 ```
+
+## 보안 감사
+
+[cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill)을 `.claude/skills/security-audit/`에 고정해 두었습니다(`UPSTREAM`에 원본 커밋, 라이선스 MIT). Claude Code에서 "이 저장소 보안 감사해줘"라고 하면 이 스킬의 6단계(정찰 → 커버리지 원장 → 사냥 → 후보 검증 → findings.json → 보고서)가 돕니다. 대상 코드는 네트워크 없는 읽기 전용 샌드박스에서만 실행합니다.
+
+첫 감사(2026-11-05, quick 프로파일, 부분 감사) 결과와 반영 내역은 [`docs/research/security-audit-2026-11-05.md`](docs/research/security-audit-2026-11-05.md)에 있습니다.
 
 ## 로드맵
 

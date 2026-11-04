@@ -27,7 +27,7 @@
               "additionalProperties": false,
               "properties": {
                 "ceiling": { "type": "string", "enum": ["deny", "allowlist", "any"] },
-                "allowlist": { "type": "array", "items": { "type": "string" } }
+                "allowlist": { "type": "array", "items": { "type": "string", "pattern": "^(\\*\\.)?([A-Za-z0-9-]+\\.)+[A-Za-z][A-Za-z0-9-]*$" }, "description": "확장 매니페스트 network.allow와 같은 호스트 형식. 매니페스트 호스트는 이 목록에 정확히 또는 하위 도메인 와일드카드로 포함되어야 한다(준수 검사기)" }
               }
             },
             "activation": {
@@ -170,6 +170,7 @@
       }
     },
     "setKnob": {
+      "description": "default ⊆ ceiling 이어야 한다. 집합 포함은 JSON Schema로 표현할 수 없으므로 준수 검사기가 반드시(MUST) 확인한다",
       "type": "object",
       "additionalProperties": false,
       "properties": {

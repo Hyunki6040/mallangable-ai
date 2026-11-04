@@ -290,6 +290,8 @@ def markdown(stats):
 
 
 def check(c):
+    if not isinstance(c, dict):
+        return {"error": "프로파일은 JSON 객체여야 합니다"}
     unknown = [k for k in c if k not in AXES]
     if unknown:
         return {"error": f"알 수 없는 축: {unknown}"}
@@ -302,6 +304,15 @@ def check(c):
     kind, rule, warns = classify(c)
     return {"result": kind, "violated": rule, "warnings": warns}
 
+
+PASS = ("clean", "warned")
+
+def no_dup_keys(pairs):
+    keys = [k for k, _ in pairs]
+    dup = sorted({k for k in keys if keys.count(k) > 1})
+    if dup:
+        raise ValueError(f"중복 키: {dup}")
+    return dict(pairs)
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -321,23 +332,23 @@ def main():
         ids = list(PROFILES) if a.check == "all" else [a.check]
         if not set(ids) <= set(PROFILES):
             sys.exit(f"알 수 없는 프로파일: {a.check} (P1~P7 또는 all)")
-        print(json.dumps({i: {"name": PROFILES[i][0], **check(PROFILES[i][1])} for i in ids},
-                         ensure_ascii=False, indent=1))
-        return
+        res = {i: {"name": PROFILES[i][0], **check(PROFILES[i][1])} for i in ids}
+        print(json.dumps(res, ensure_ascii=False, indent=1))
+        return 0 if all(r.get("result") in PASS for r in res.values()) else 1
     if a.profile:
         try:
             if os.path.isfile(a.profile):
                 with open(a.profile, encoding="utf-8") as fh:
-                    prof = json.load(fh)
+                    prof = json.load(fh, object_pairs_hook=no_dup_keys)
             else:
-                prof = json.loads(a.profile)
-        except json.JSONDecodeError as e:
+                prof = json.loads(a.profile, object_pairs_hook=no_dup_keys)
+        except (json.JSONDecodeError, ValueError) as e:
             sys.exit(f"--profile JSON 오류: {e}")
         out = check(prof)
-        if "error" not in out and out["result"] in ("clean", "warned"):
+        if out.get("result") in PASS:
             out["business_models"] = {f"{b} {BMS[b][0]}": v for b, v in bm_row(prof).items()}
         print(json.dumps(out, ensure_ascii=False, indent=1))
-        return
+        return 0 if out.get("result") in PASS else 1  # gate-safe: error·logical·normative → exit 1
     stats = enumerate_space()
     print(markdown(stats) if a.markdown else json.dumps(as_jsonable(stats), ensure_ascii=False, indent=1))
 

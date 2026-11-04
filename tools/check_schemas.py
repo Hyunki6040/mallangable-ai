@@ -14,6 +14,16 @@ for p in sorted((R / "schemas").glob("*.json")):
     s = json.loads(p.read_text())
     Draft202012Validator.check_schema(s)
     V[p.name.split(".")[0]] = Draft202012Validator(s, format_checker=FormatChecker())
+MAX_BYTES, MAX_MSG = 1 << 20, 300  # 설계 제안값: 외부 문서 1 MiB, 오류 한 줄 300자
+safe = lambda s: repr(str(s))[1:-1][:MAX_MSG]  # 제어 문자·개행 이스케이프 (터미널·CI 주석 주입 방지)
+assert safe("a\x1b[2K\r\n::error::") == "a\\x1b[2K\\r\\n::error::"
+
+class NoAliasLoader(yaml.SafeLoader):  # ponytail: 별칭 전면 거부. 명세 문서는 앵커가 필요 없다 (alias bomb 방지)
+    def compose_node(self, parent, index):
+        if self.check_event(yaml.AliasEvent):
+            raise yaml.YAMLError("YAML alias(*ref) is not allowed")
+        return super().compose_node(parent, index)
+
 if len(sys.argv) > 1:  # validate the caller's own documents, skip the self-test
     sc, files = sys.argv[1], sys.argv[2:]
     if sc not in V or not files:
@@ -21,15 +31,22 @@ if len(sys.argv) > 1:  # validate the caller's own documents, skip the self-test
     bad = 0
     for f in files:
         try:
-            docs = list(yaml.safe_load_all(pathlib.Path(f).read_text(encoding="utf-8")))
-        except (OSError, yaml.YAMLError) as e:
-            print(f"FAIL {f}\n  {e}"); bad += 1; continue
+            raw = pathlib.Path(f).read_bytes()
+            if len(raw) > MAX_BYTES:
+                raise ValueError(f"file larger than {MAX_BYTES} bytes")
+            docs = list(yaml.load_all(raw.decode("utf-8"), Loader=NoAliasLoader))
+        except (OSError, ValueError, yaml.YAMLError) as e:
+            print(f"FAIL {safe(f)}\n  {safe(e)}"); bad += 1; continue
         for i, d in enumerate(docs):
-            errs = sorted(V[sc].iter_errors(d), key=lambda e: e.json_path)
-            print(f"{'OK  ' if not errs else 'FAIL'} {f}[{i}]", *(f"{e.json_path}: {e.message}" for e in errs[:5]), sep="\n  ")
+            try:
+                errs = sorted(V[sc].iter_errors(d), key=lambda e: str(e.json_path))
+                lines = [f"{safe(e.json_path)}: {safe(e.message)}" for e in errs[:5]]
+            except Exception as e:  # 비문자열 키 등: 이 문서만 실패로 보고하고 다음 파일을 계속 본다
+                errs, lines = [e], [f"validator error: {safe(type(e).__name__)}: {safe(e)}"]
+            print(f"{'OK  ' if not errs else 'FAIL'} {safe(f)}[{i}]", *lines, sep="\n  ")
             bad += bool(errs)
     sys.exit(1 if bad else 0)
-load = lambda n: list(yaml.safe_load_all((R / "examples" / n).read_text()))
+load = lambda n: list(yaml.safe_load_all((R / "examples" / n).read_text(encoding="utf-8")))
 EX = {"capability-map": "capability-map.example.yaml", "change-record": "change.example.yaml",
       "extension-manifest": "extension-manifest.example.yaml", "lexicon-pack": "lexicon.ko.yaml",
       "policy": "policy.example.yaml"}
@@ -80,6 +97,14 @@ CASES = [
      mk(M, both(set_(("depth",), "D4"), set_(("artifact", "form"), "native"))), True),
     ("network allow '*' with no egress capability", "extension-manifest",
      mk(M, both(set_(("network",), {"allow": ["*"]}), set_(("permissions",), []))), True),
+    ("contract = prose-only deterministic item, no executable form (2.5)", "change-record",
+     mk(C[0], set_(("contract",), [{"id": "prose", "check": "tree-query", "expect": "목록 2건"}])), True),
+    ("network allow IP literal 169.254.169.254 (7.11)", "extension-manifest",
+     mk(M, set_(("network",), {"allow": ["169.254.169.254"]})), True),
+    ("network allow host but permissions lack egress capability (I4, cross-document)", "extension-manifest",
+     mk(M, set_(("network",), {"allow": ["hooks.slack.com"]})), False),
+    ("network allow public-suffix wildcard *.co.uk (cross-document, PSL)", "extension-manifest",
+     mk(M, both(set_(("network",), {"allow": ["*.co.uk"]}), set_(("permissions",), ["net.slack.post"]))), False),
     ("D4 sandboxed with no state (5.9)", "extension-manifest",
      mk(M, both(set_(("depth",), "D4"), set_(("artifact", "form"), "sandboxed"), pop(("state",)))), True),
     ("depth ceiling D9 / default banana", "policy",
@@ -88,6 +113,8 @@ CASES = [
      mk(P[2], set_(("policy", "knobs", "depth"), {"ceiling": "D5"})), False),
     ("default outside ceiling", "policy",
      mk(P[1], set_(("policy", "knobs", "depth"), {"ceiling": "D2", "default": "D4"})), True),
+    ("capabilities default outside ceiling (setKnob, validator MUST)", "policy",
+     mk(P[1], set_(("policy", "knobs", "capabilities"), {"ceiling": ["tasks.read"], "default": ["net.slack.post"]})), False),
     ("floors missing 6 of 7", "policy", mk(P[1], set_(("policy", "floors"), ["rollback"] * 7)), True),
 ]
 for name, sc, doc, want in CASES:
