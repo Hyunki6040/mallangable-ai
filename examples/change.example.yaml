@@ -1,0 +1,80 @@
+# 변경 기록 예시 두 건 (명세 2.4, 2.5, 6.11)
+# 스키마: schemas/change-record.schema.json
+# 첫 번째: D3 선언형 패널. 권한 증가 없음.
+id: chg_01JBX7M0A1
+feature: f_01JBX7K2M9Q2
+type: feat
+summary: 이번 주 완료한 일 패널 추가
+intent: 주간 회고 때 이번 주 완료 항목을 한눈에 보고 싶다
+depth: D3
+points: [sidebar.panel]
+artifacts: [weekly-done-panel]
+contract:
+  - id: only-this-week
+    check: tree-query
+    selector: "sidebar.panel[ext=weekly-done-panel] list > item"
+    fixture_ref: fixtures/done-this-week-2-last-week-1.json
+    assert: count == 2
+    given: 이번 주 완료 2건, 지난주 완료 1건
+    expect: 패널 목록에 2건만 표시
+  - id: empty-state
+    check: tree-query
+    given: 이번 주 완료 0건
+    expect: "'이번 주에 완료한 일이 없어요' 문구 표시"
+  - id: no-slowdown
+    check: snapshot
+    given: 할 일 1,000건
+    expect: 패널 첫 표시 200ms 이내
+validation:
+  id: val_8f21
+  result: pass
+  gates: { G0: pass, G1: pass, G2: pass, G3: pass, G4: pass }
+provenance:
+  requested_by: u_8c1f
+  agent: builder@harness-x
+  generator_instance: gen-7a1
+  judge_instance: rev-2c9
+  model_route: standard
+  prompt_hash: "sha256:3b5d5c3712955042212316173ccf37be8a5b1a3e1d6f2b8d36e5f0c3a7b9e211"
+  harness_digest: "sha256:9e0c6a41d2f87b35c1e4a09b7d63f2851ac4e0d9b6f37a2c58e1d40f9b2c7a63"
+  parent_state: st_01JBX6ZZ90
+  at: "2026-10-28T09:41:12+09:00"
+visibility: V2
+---
+# 두 번째: D4 이벤트 훅. 외부 전송 권한이 늘었으므로 G5(사람 승인)를 거쳤다 (I4).
+id: chg_01JBX9Q4T7
+feature: f_01JBX9Q2S5
+type: feat
+summary: 완료 시 팀 채팅 알림 추가
+intent: 일을 끝내면 팀에 자동으로 알리고 싶다
+depth: D4
+points: [task.on_complete]
+artifacts: [done-to-slack]
+permissions_delta:
+  add: [net.slack.post]
+contract:
+  - id: posts-once
+    check: unit
+    entry: "main.js#onComplete"
+    input: [{ event: task.completed, task_id: t_1 }]
+    expected: { "net.slack.post.calls": 1 }
+    given: 완료 이벤트 1회
+    expect: 외부 전송 호출 정확히 1회
+  - id: no-post-on-undo
+    check: unit
+    given: 완료 후 즉시 완료 취소
+    expect: 추가 전송 없음
+validation:
+  id: val_9a03
+  result: pass
+  gates: { G0: pass, G1: pass, G2: pass, G3: pass, G4: pass, G5: approved }
+provenance:
+  requested_by: u_8c1f
+  approved_by: u_admin01
+  agent: builder@harness-x
+  generator_instance: gen-7a4
+  judge_instance: rev-2d1
+  model_route: standard
+  parent_state: st_01JBX7M0A1
+  at: "2026-10-28T10:15:03+09:00"
+visibility: V2

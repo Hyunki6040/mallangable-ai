@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mallangable.ai/schemas/v0.1/policy.schema.json",
+  "title": "Mallangable 정책 문서",
+  "description": "손잡이별 허용 구간(상한·기본값)과 사용자 권리 하한. 사슬 위 정책의 교집합이 유효 정책이다 (명세 2.7, 4.2~4.8).",
+  "type": "object",
+  "required": ["policy"],
+  "additionalProperties": false,
+  "properties": {
+    "policy": {
+      "type": "object",
+      "required": ["id", "level", "knobs", "floors"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "level": { "type": "string", "enum": ["vendor", "operator", "tenant", "org", "user"] },
+        "inherits": { "type": "string", "description": "상위 정책 id. 하위는 상위보다 넓힐 수 없다 (I5). 상위 문서와의 비교는 JSON Schema로 표현할 수 없으므로 준수 검사기가 반드시(MUST) 확인한다" },
+        "knobs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "depth": { "$ref": "#/$defs/depthKnob", "description": "D1 < D2 < D3 < D4 < D5" },
+            "points": { "$ref": "#/$defs/setKnob" },
+            "capabilities": { "$ref": "#/$defs/setKnob" },
+            "network": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ceiling": { "type": "string", "enum": ["deny", "allowlist", "any"] },
+                "allowlist": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "activation": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ceiling": { "type": "string", "enum": ["gated", "preview", "live"] },
+                "by_depth": {
+                  "type": "object",
+                  "propertyNames": { "enum": ["D1", "D2", "D3", "D4", "D5"] },
+                  "additionalProperties": { "type": "string", "enum": ["gated", "preview", "live"] }
+                },
+                "approver_on_capability_increase": { "type": "string", "enum": ["self", "org_steward", "tenant_admin"] }
+              }
+            },
+            "baseline_apply": { "$ref": "#/$defs/baselineApplyKnob", "description": "defer < approve < auto" },
+            "sharing": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ceiling": { "type": "string", "enum": ["none", "tenant", "public"] },
+                "reshare": { "type": "string", "enum": ["forbidden", "author_opt_in", "free"] }
+              }
+            },
+            "code_visibility": { "$ref": "#/$defs/valueKnob" },
+            "model_route": { "$ref": "#/$defs/valueKnob" },
+            "quality_tier": { "$ref": "#/$defs/qualityTierKnob", "description": "economy < standard < high" },
+            "budget": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "monthly": { "type": "number", "minimum": 0 },
+                "per_user_monthly": { "type": "number", "minimum": 0 },
+                "currency": { "type": "string" },
+                "on_exceed": { "type": "string", "enum": ["stop", "economy", "notify"] }
+              }
+            },
+            "admin_visibility": { "$ref": "#/$defs/valueKnob" },
+            "platform_export": { "$ref": "#/$defs/platformExportKnob", "description": "none < V0 < V1 < V2" },
+            "retention_days": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "floors": {
+          "type": "array",
+          "description": "사용자 권리 하한. 아래 7개는 모든 정책에 반드시 포함 (명세 4.6)",
+          "items": { "type": "string", "enum": ["rollback", "safe_mode", "visibility_notice", "export_intents", "permission_view", "spend_cap", "receipt"] },
+          "allOf": [
+            { "contains": { "const": "rollback" } },
+            { "contains": { "const": "safe_mode" } },
+            { "contains": { "const": "visibility_notice" } },
+            { "contains": { "const": "export_intents" } },
+            { "contains": { "const": "permission_view" } },
+            { "contains": { "const": "spend_cap" } },
+            { "contains": { "const": "receipt" } }
+          ]
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "depthKnob": {
+      "description": "D1 < D2 < D3 < D4 < D5. floor ≤ default ≤ ceiling",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ceiling": { "enum": ["D1", "D2", "D3", "D4", "D5"] },
+        "floor": { "enum": ["D1", "D2", "D3", "D4", "D5"] },
+        "default": { "enum": ["D1", "D2", "D3", "D4", "D5"] }
+      },
+      "allOf": [
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "D1" } } }, "then": { "properties": { "default": { "enum": ["D1"] }, "floor": { "enum": ["D1"] } } } },
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "D2" } } }, "then": { "properties": { "default": { "enum": ["D1", "D2"] }, "floor": { "enum": ["D1", "D2"] } } } },
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "D3" } } }, "then": { "properties": { "default": { "enum": ["D1", "D2", "D3"] }, "floor": { "enum": ["D1", "D2", "D3"] } } } },
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "D4" } } }, "then": { "properties": { "default": { "enum": ["D1", "D2", "D3", "D4"] }, "floor": { "enum": ["D1", "D2", "D3", "D4"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "D2" } } }, "then": { "properties": { "default": { "enum": ["D2", "D3", "D4", "D5"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "D3" } } }, "then": { "properties": { "default": { "enum": ["D3", "D4", "D5"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "D4" } } }, "then": { "properties": { "default": { "enum": ["D4", "D5"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "D5" } } }, "then": { "properties": { "default": { "enum": ["D5"] } } } }
+      ]
+    },
+    "baselineApplyKnob": {
+      "description": "defer < approve < auto. floor ≤ default ≤ ceiling",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ceiling": { "enum": ["defer", "approve", "auto"] },
+        "floor": { "enum": ["defer", "approve", "auto"] },
+        "default": { "enum": ["defer", "approve", "auto"] }
+      },
+      "allOf": [
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "defer" } } }, "then": { "properties": { "default": { "enum": ["defer"] }, "floor": { "enum": ["defer"] } } } },
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "approve" } } }, "then": { "properties": { "default": { "enum": ["defer", "approve"] }, "floor": { "enum": ["defer", "approve"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "approve" } } }, "then": { "properties": { "default": { "enum": ["approve", "auto"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "auto" } } }, "then": { "properties": { "default": { "enum": ["auto"] } } } }
+      ]
+    },
+    "qualityTierKnob": {
+      "description": "economy < standard < high. floor ≤ default ≤ ceiling",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ceiling": { "enum": ["economy", "standard", "high"] },
+        "floor": { "enum": ["economy", "standard", "high"] },
+        "default": { "enum": ["economy", "standard", "high"] }
+      },
+      "allOf": [
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "economy" } } }, "then": { "properties": { "default": { "enum": ["economy"] }, "floor": { "enum": ["economy"] } } } },
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "standard" } } }, "then": { "properties": { "default": { "enum": ["economy", "standard"] }, "floor": { "enum": ["economy", "standard"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "standard" } } }, "then": { "properties": { "default": { "enum": ["standard", "high"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "high" } } }, "then": { "properties": { "default": { "enum": ["high"] } } } }
+      ]
+    },
+    "platformExportKnob": {
+      "description": "none < V0 < V1 < V2. floor ≤ default ≤ ceiling",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ceiling": { "enum": ["none", "V0", "V1", "V2"] },
+        "floor": { "enum": ["none", "V0", "V1", "V2"] },
+        "default": { "enum": ["none", "V0", "V1", "V2"] }
+      },
+      "allOf": [
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "none" } } }, "then": { "properties": { "default": { "enum": ["none"] }, "floor": { "enum": ["none"] } } } },
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "V0" } } }, "then": { "properties": { "default": { "enum": ["none", "V0"] }, "floor": { "enum": ["none", "V0"] } } } },
+        { "if": { "required": ["ceiling"], "properties": { "ceiling": { "const": "V1" } } }, "then": { "properties": { "default": { "enum": ["none", "V0", "V1"] }, "floor": { "enum": ["none", "V0", "V1"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "V0" } } }, "then": { "properties": { "default": { "enum": ["V0", "V1", "V2"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "V1" } } }, "then": { "properties": { "default": { "enum": ["V1", "V2"] } } } },
+        { "if": { "required": ["floor"], "properties": { "floor": { "const": "V2" } } }, "then": { "properties": { "default": { "enum": ["V2"] } } } }
+      ]
+    },
+    "orderedKnob": {
+      "description": "구형 범용 순서 손잡이(하위 호환용). 현재 손잡이는 모두 값 영역을 고정한 전용 정의를 쓴다",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ceiling": { "type": "string" },
+        "floor": { "type": "string" },
+        "default": { "type": "string" }
+      }
+    },
+    "setKnob": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ceiling": { "type": "array", "items": { "type": "string" } },
+        "default": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "valueKnob": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "string" },
+        "options": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mallangable.ai/schemas/v0.1/change-record.schema.json",
+  "title": "Mallangable 변경 기록 (Change Record)",
+  "description": "ChangeStore.record()가 저장하는 단위. 의도·계약·출처를 포함해 병합·승격·감사의 근거가 된다 (명세 2.4, 2.5, 6.11).",
+  "type": "object",
+  "required": ["id", "feature", "type", "intent", "depth", "points", "contract", "validation", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "feature": { "type": "string", "pattern": "^f_[0-9A-Z]{8,26}$" },
+    "type": { "type": "string", "enum": ["feat", "fix", "style", "refactor", "perf", "revert", "upgrade", "share", "promote", "chore"] },
+    "summary": { "type": "string", "maxLength": 50, "description": "결과형 요약" },
+    "intent": { "type": "string", "minLength": 4, "pattern": "\\S", "description": "사람의 의도 요약 (I9). 공백만으로 된 값은 거부" },
+    "depth": { "type": "string", "enum": ["D1", "D2", "D3", "D4", "D5"] },
+    "points": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9_]+)+$" }, "description": "확장 지점 id (capability-map extensionPoint.id와 같은 형식). 기능 지도에 실제로 있는지는 준수 검사기가 확인한다" },
+    "artifacts": { "type": "array", "items": { "type": "string" }, "description": "확장 매니페스트 id 또는 경로" },
+    "permissions_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "add": { "type": "array", "items": { "$ref": "#/$defs/capabilityId" }, "description": "늘어난 권한. 하나라도 있으면 G5 approved와 provenance.approved_by가 필요하다 (I4)" },
+        "remove": { "type": "array", "items": { "$ref": "#/$defs/capabilityId" } }
+      }
+    },
+    "overrides": { "type": "array", "items": { "type": "string" }, "description": "덮어쓴 상위 레이어 항목" },
+    "contract": {
+      "type": "array",
+      "minItems": 1,
+      "description": "계약은 비어 있으면 안 된다 (I2). 병합에서는 추가만 가능 (6.7). 결정적 계약(tree-query·unit·snapshot)이 최소 하나 있어야 한다 (2.5)",
+      "items": { "$ref": "#/$defs/contractItem" },
+      "contains": { "required": ["check"], "properties": { "check": { "enum": ["tree-query", "unit", "snapshot"] } } }
+    },
+    "validation": {
+      "type": "object",
+      "required": ["id", "result"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "result": { "type": "string", "enum": ["pass"] },
+        "gates": {
+          "type": "object",
+          "propertyNames": { "enum": ["G0", "G1", "G2", "G3", "G4", "G5"] },
+          "additionalProperties": { "type": "string", "enum": ["pass", "skip", "approved"] },
+          "description": "깊이별 필수 게이트는 skip일 수 없다 (5.8 표). 아래 allOf에서 강제"
+        }
+      }
+    },
+    "merge": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "upstream": { "type": "string", "description": "예: official@2026.11" },
+        "shared_from": { "type": "string" },
+        "resolved": {
+          "type": "object",
+          "propertyNames": { "enum": ["r0", "r1", "r2", "r3", "r4", "r5"] },
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "rationale": { "type": "string", "maxLength": 400 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["requested_by", "agent", "at"],
+      "additionalProperties": false,
+      "properties": {
+        "requested_by": { "type": "string", "pattern": "\\S", "description": "사람 행위자 가명 id" },
+        "approved_by": { "type": "string", "pattern": "\\S", "description": "권한 증가·G5를 승인한 사람 행위자 가명 id (I4)" },
+        "agent": { "type": "string", "pattern": "\\S", "description": "역할@하네스" },
+        "generator_instance": { "type": "string", "pattern": "\\S" },
+        "judge_instance": { "type": "string", "pattern": "\\S", "description": "generator_instance와 달라야 한다 (I7). 두 값 비교는 JSON Schema로 표현할 수 없으므로 준수 검사기가 반드시(MUST) 확인한다" },
+        "model_route": { "type": "string" },
+        "prompt_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "harness_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "변경을 만든 하네스 구성(스킬·훅·정책 사본·도구 목록)의 내용 해시. 같은 agent 문자열이라도 구성이 다르면 값이 다르다" },
+        "parent_state": { "type": "string" },
+        "at": { "type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$", "description": "RFC 3339. format은 검사기 설정에 따라 단언되지 않을 수 있어 pattern을 함께 둔다" }
+      }
+    },
+    "large_change": { "type": "string", "description": "크기 규칙 예외 사유" },
+    "visibility": { "type": "string", "enum": ["V0", "V1", "V2", "V3"] }
+  },
+  "allOf": [
+    { "$ref": "#/$defs/gatesByDepth" },
+    {
+      "description": "권한 증가는 사람 승인(G5 approved)으로만 (I4, 5.8 G5)",
+      "if": { "properties": { "permissions_delta": { "properties": { "add": { "minItems": 1 } }, "required": ["add"] } }, "required": ["permissions_delta"] },
+      "then": { "properties": { "validation": { "properties": { "gates": { "required": ["G5"], "properties": { "G5": { "const": "approved" } } } }, "required": ["gates"] } } }
+    },
+    {
+      "description": "G5 승인에는 승인한 사람이 기록돼야 한다 (I4)",
+      "if": { "properties": { "validation": { "properties": { "gates": { "properties": { "G5": { "const": "approved" } }, "required": ["G5"] } }, "required": ["gates"] } }, "required": ["validation"] },
+      "then": { "properties": { "provenance": { "required": ["approved_by"] } } }
+    },
+    {
+      "description": "G4를 통과했다면 생성자·판정자 인스턴스가 모두 기록돼야 한다 (I7). 두 값이 다른지는 준수 검사기가 반드시 확인한다",
+      "if": { "properties": { "validation": { "properties": { "gates": { "properties": { "G4": { "const": "pass" } }, "required": ["G4"] } }, "required": ["gates"] } }, "required": ["validation"] },
+      "then": { "properties": { "provenance": { "required": ["generator_instance", "judge_instance"] } } }
+    }
+  ],
+  "$defs": {
+    "capabilityId": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9_*]+)+$" },
+    "gatesByDepth": {
+      "description": "5.8 깊이별 필수 게이트(●). 필수 게이트는 기록돼야 하고 skip일 수 없다",
+      "allOf": [
+        { "if": { "properties": { "depth": { "const": "D1" } } }, "then": { "$ref": "#/$defs/gatesUpToG1" } },
+        { "if": { "properties": { "depth": { "const": "D2" } } }, "then": { "$ref": "#/$defs/gatesUpToG2" } },
+        { "if": { "properties": { "depth": { "const": "D3" } } }, "then": { "$ref": "#/$defs/gatesUpToG3" } },
+        { "if": { "properties": { "depth": { "const": "D4" } } }, "then": { "$ref": "#/$defs/gatesUpToG4" } },
+        { "if": { "properties": { "depth": { "const": "D5" } } }, "then": { "$ref": "#/$defs/gatesUpToG5" } }
+      ]
+    },
+    "gatesUpToG1": { "properties": { "validation": { "required": ["gates"], "properties": { "gates": { "required": ["G0", "G1"], "properties": { "G0": { "const": "pass" }, "G1": { "const": "pass" } } } } } } },
+    "gatesUpToG2": { "allOf": [ { "$ref": "#/$defs/gatesUpToG1" }, { "properties": { "validation": { "properties": { "gates": { "required": ["G2"], "properties": { "G2": { "const": "pass" } } } } } } } ] },
+    "gatesUpToG3": { "allOf": [ { "$ref": "#/$defs/gatesUpToG2" }, { "properties": { "validation": { "properties": { "gates": { "required": ["G3"], "properties": { "G3": { "const": "pass" } } } } } } } ] },
+    "gatesUpToG4": { "allOf": [ { "$ref": "#/$defs/gatesUpToG3" }, { "properties": { "validation": { "properties": { "gates": { "required": ["G4"], "properties": { "G4": { "const": "pass" } } } } } } } ] },
+    "gatesUpToG5": { "allOf": [ { "$ref": "#/$defs/gatesUpToG4" }, { "properties": { "validation": { "properties": { "gates": { "required": ["G5"], "properties": { "G5": { "const": "approved" } } } } } } } ] },
+    "contractItem": {
+      "description": "실행 가능한 형태(tree-query·unit·snapshot), 판정자(judge), 또는 구형 자유 서술(prose) 중 정확히 하나 (C-02). given·expect는 모든 형태에서 사람용 설명이다",
+      "oneOf": [
+        { "$ref": "#/$defs/contractTreeQuery" },
+        { "$ref": "#/$defs/contractUnit" },
+        { "$ref": "#/$defs/contractSnapshot" },
+        { "$ref": "#/$defs/contractJudge" },
+        { "$ref": "#/$defs/contractProse" }
+      ]
+    },
+    "contractTreeQuery": {
+      "title": "구조 질의 (실행 가능)",
+      "type": "object",
+      "required": ["id", "check", "selector", "fixture_ref", "assert"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/contractId" },
+        "check": { "const": "tree-query" },
+        "selector": { "$ref": "#/$defs/nonBlank", "description": "유효 앱 UI 트리에 대한 질의 (예: 확장 지점 기준 상대 선택자)" },
+        "fixture_ref": { "$ref": "#/$defs/nonBlank", "description": "고정 입력 데이터 참조" },
+        "assert": { "$ref": "#/$defs/nonBlank", "description": "질의 결과에 대한 단언식 (예: count == 2)" },
+        "given": { "type": "string" },
+        "expect": { "type": "string" },
+        "deterministic": { "const": true }
+      }
+    },
+    "contractUnit": {
+      "title": "단위 검사 (실행 가능)",
+      "type": "object",
+      "required": ["id", "check", "entry", "input", "expected"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/contractId" },
+        "check": { "const": "unit" },
+        "entry": { "$ref": "#/$defs/nonBlank", "description": "산출물 안의 검사 대상 (모듈#함수 또는 이벤트 처리기)" },
+        "input": { "description": "입력 값 또는 이벤트 열" },
+        "expected": { "description": "기대 출력 또는 관측 값" },
+        "given": { "type": "string" },
+        "expect": { "type": "string" },
+        "deterministic": { "const": true }
+      }
+    },
+    "contractSnapshot": {
+      "title": "스냅샷 (실행 가능, 환경 고정 시 결정적)",
+      "type": "object",
+      "required": ["id", "check", "env_ref", "baseline_ref"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/contractId" },
+        "check": { "const": "snapshot" },
+        "env_ref": { "$ref": "#/$defs/nonBlank", "description": "고정된 렌더 환경(뷰포트·글꼴·데이터) 참조" },
+        "baseline_ref": { "$ref": "#/$defs/nonBlank", "description": "비교 기준 스냅샷 참조" },
+        "given": { "type": "string" },
+        "expect": { "type": "string" },
+        "deterministic": { "const": true }
+      }
+    },
+    "contractJudge": {
+      "title": "판정자 (확률적)",
+      "description": "판정자 계약은 확률적이므로 deterministic: false를 명시해야 하며 단독으로 쓸 수 없다 (2.5)",
+      "type": "object",
+      "required": ["id", "check", "expect", "deterministic"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/contractId" },
+        "check": { "const": "judge" },
+        "given": { "type": "string" },
+        "expect": { "$ref": "#/$defs/nonBlank" },
+        "deterministic": { "const": false }
+      }
+    },
+    "contractProse": {
+      "title": "자유 서술 (구형, 기계 실행 불가)",
+      "description": "v0.1 하위 호환용. 실행 필드(selector·entry·env_ref 등)가 없는 서술형 결정적 계약. 판정 기준이 기계 실행 가능하지 않으므로 새 기록은 실행 가능한 형태를 써야 한다(해야 함)",
+      "deprecated": true,
+      "type": "object",
+      "required": ["id", "check", "expect"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/contractId" },
+        "check": { "enum": ["tree-query", "unit", "snapshot"] },
+        "given": { "type": "string" },
+        "expect": { "$ref": "#/$defs/nonBlank" },
+        "deterministic": { "const": true }
+      }
+    },
+    "contractId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "nonBlank": { "type": "string", "pattern": "\\S" }
+  }
+}

@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "이 명세를 인용할 때는 아래 정보를 쓰고, 근거가 된 절·규칙 id(예: 3.3 L1, I7)를 함께 적어 주세요."
+type: software
+title: "Mallangable-AI: A Reference Architecture for AI-Driven Malleable Software"
+abstract: >-
+  Vendor-neutral reference architecture for malleable software driven by AI agents:
+  formal model with ten invariants, five-level change-depth hierarchy, an eleven-axis
+  design space with a calculator, interval-delegation control with user floor rights,
+  a six-plane reference architecture, contract-preserving merges, and a business-model
+  coupling matrix. Korean-language specification with JSON Schemas and tools.
+authors:
+  - name: "Mallangable-AI contributors"
+version: "0.2.2"
+date-released: "2026-11-04"
+license:
+  - CC-BY-4.0
+  - Apache-2.0
+keywords:
+  - malleable software
+  - end-user programming
+  - AI agents
+  - reference architecture
+  - design space

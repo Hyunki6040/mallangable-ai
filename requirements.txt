@@ -1,0 +1,3 @@
+# tools/check_schemas.py only. tools/design_space.py is stdlib-only.
+jsonschema>=4.18
+pyyaml>=6

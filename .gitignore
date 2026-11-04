@@ -1,0 +1,9 @@
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+# local agent/tool state
+.remember/
+.tybre/
+__pycache__/
+.venv/
+.DS_Store
+.ignore

@@ -1,0 +1,77 @@
+# 한국어 기본 용어팩 + 분야 팩(교육) 예시 (명세 8.9)
+# 스키마: schemas/lexicon-pack.schema.json
+pack:
+  id: mallang.core.ko
+  version: "0.1.0"
+  domain: general
+locale: ko
+concepts:
+  change:           { basic: 바꾼 것, practitioner: 변경, developer: change, explain: 한 번에 바꾼 내용 }
+  feature:          { basic: 내가 만든 기능, practitioner: 기능, developer: feature, explain: 같은 목적으로 바꾼 것들의 묶음 }
+  record:           { basic: 저장 지점, practitioner: 기록, developer: commit, explain: 언제든 돌아올 수 있는 지점 }
+  branch:           { basic: 실험판, practitioner: 실험 브랜치, developer: branch, explain: 원래 것을 건드리지 않고 시험해 보는 사본 }
+  merge:            { basic: 합치기, practitioner: 병합, developer: merge, explain: 두 버전을 하나로 합침 }
+  conflict:         { basic: 겹치는 부분, practitioner: 충돌, developer: conflict, explain: 양쪽이 같은 곳을 다르게 바꿈 }
+  intent_conflict:  { basic: 선택이 필요한 부분, practitioner: 의도 충돌, developer: intent conflict, explain: 두 가지를 동시에 만족할 수 없음 }
+  revert:           { basic: 되돌리기, practitioner: 되돌리기, developer: revert, explain: 이전 상태로 돌아감 }
+  baseline:         { basic: 기본판, practitioner: 기준판, developer: baseline (LTS), explain: 모두가 출발점으로 쓰는 버전 }
+  baseline_official: { basic: 공식 기본판, practitioner: 공식 기준판, developer: official baseline }
+  baseline_tenant:  { basic: 회사 기본판, practitioner: 테넌트 기준판, developer: tenant baseline }
+  baseline_org:     { basic: 팀 기본판, practitioner: 조직 기준판, developer: org baseline }
+  release:          { basic: 새 기본판, practitioner: 기준판 릴리스, developer: release, explain: 기본판이 새로 나옴 }
+  fork:             { basic: 내 사본, practitioner: 포크, developer: fork, explain: 기본판에서 갈라져 나온 내 버전 }
+  extension_point:  { basic: 바꿀 수 있는 자리, practitioner: 확장 지점, developer: extension point, explain: 앱이 수정을 허용한 위치 }
+  capability:       { basic: 허용 범위, practitioner: 권한, developer: capability, explain: 기능이 쓸 수 있는 데이터와 행동 }
+  sandbox:          { basic: 안전 공간, practitioner: 격리 실행 환경, developer: sandbox, explain: 다른 데 영향 없이 먼저 돌려 보는 곳 }
+  validation:       { basic: 확인, practitioner: 검증, developer: validation gates, explain: 약속대로 동작하는지 검사 }
+  contract:         { basic: 약속 목록, practitioner: 수용 조건, developer: contract, explain: 이 기능이 반드시 지켜야 할 것 }
+  diff:             { basic: 바뀐 점, practitioner: 차이, developer: diff, explain: 전과 후의 차이 }
+  activate:         { basic: 적용, practitioner: 활성화, developer: activate, explain: 실제로 켜기 }
+  preview:          { basic: 미리보기, practitioner: 미리보기, developer: preview }
+  safe_mode:        { basic: 기본 모드로 시작, practitioner: 세이프 모드, developer: safe mode, explain: 내 변경을 모두 끄고 시작 }
+  quarantine:       { basic: 잠시 꺼 둠, practitioner: 격리, developer: quarantine, explain: 문제를 일으킨 기능을 멈춤 }
+  depth:            { basic: 바꾸는 정도, practitioner: 변경 깊이, developer: depth D1-D5 }
+  depth_d1:         { basic: 모양, practitioner: 외형(D1), developer: D1 }
+  depth_d2:         { basic: 조합, practitioner: 조합(D2), developer: D2 }
+  depth_d3:         { basic: 화면, practitioner: 화면(D3), developer: D3 }
+  depth_d4:         { basic: 동작, practitioner: 동작(D4), developer: D4 }
+  policy_ceiling:   { basic: 회사에서 허용한 범위, practitioner: 정책 상한, developer: policy ceiling }
+  canary:           { basic: 차례로 적용, practitioner: 단계적 적용, developer: canary rollout, explain: 일부부터 적용하며 문제를 확인 }
+  drift:            { basic: 기본판보다 뒤처짐, practitioner: 기준판 드리프트, developer: drift }
+  subscribe_share:  { basic: 계속 받아보기, practitioner: 구독형 공유, developer: subscribe share, explain: 보낸 사람이 고치면 나도 업데이트 제안을 받음 }
+  promotion:        { basic: 공식 기능으로 채택, practitioner: 승격, developer: promotion }
+  audit_log:        { basic: 활동 기록, practitioner: 감사 로그, developer: audit log }
+  visibility:       { basic: 관리자에게 보이는 범위, practitioner: 관리 가시성, developer: visibility V0-V3 }
+  agent:            { basic: AI 도우미, practitioner: 에이전트, developer: agent }
+  model:            { basic: AI 엔진, practitioner: 모델, developer: model }
+  api_key:          { basic: 연결 열쇠, practitioner: API 키, developer: API key, explain: AI 엔진을 쓰기 위한 비밀 코드 }
+  tokens:           { basic: 사용량, practitioner: 토큰 사용량, developer: tokens }
+  route_quality:    { basic: 품질 모드, practitioner: 모델 라우팅 등급, developer: route tier }
+  receipt:          { basic: 영수증, practitioner: 변경 영수증, developer: change receipt }
+  badge_user_added: { basic: 내가 추가한 기능, practitioner: 사용자 확장, developer: user extension }
+  cap_tasks_read:   { basic: 할 일 보기, practitioner: 할 일 읽기 권한, developer: tasks.read }
+  cap_tasks_write:  { basic: 할 일 바꾸기, practitioner: 할 일 쓰기 권한, developer: tasks.write }
+  cap_notify_local: { basic: 내 화면에 알림, practitioner: 로컬 알림 권한, developer: notify.local }
+  cap_net_post:     { basic: 외부로 내용 보내기, practitioner: 외부 전송 권한, developer: net.*.post, caution: 앱 밖으로 정보가 나갑니다 }
+  cap_people_read:  { basic: 다른 사람 정보 보기, practitioner: 구성원 정보 읽기 권한, developer: people.read, caution: 다른 사람의 정보에 접근합니다 }
+lint:
+  basic_forbidden: [커밋, 브랜치, 머지, 병합, 리베이스, 포크, 토큰, API, 샌드박스, 디프, 배포, 롤백, 매니페스트, 훅, 리포지토리, 저장소]
+  status_words:
+    understanding: 이해하는 중
+    building: 만드는 중
+    checking: 확인하는 중
+    ready: 준비됐어요
+---
+# 분야 팩: 교육. 기본 팩을 확장해 일부 개념만 덮어쓴다.
+pack:
+  id: mallang.education.ko
+  version: "0.1.0"
+  extends: mallang.core.ko
+  domain: education
+locale: ko
+concepts:
+  feature:         { basic: 내 수업 도구, explain: 수업에 맞게 만든 기능 }
+  baseline_tenant: { basic: 학교 기본판 }
+  baseline_org:    { basic: 학년 기본판 }
+  cap_people_read: { basic: 학생 정보 보기, caution: 학생 개인정보에 접근합니다. 학교 규정을 확인하세요 }
+  subscribe_share: { basic: 동료 선생님 것 계속 받아보기 }

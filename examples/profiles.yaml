@@ -1,0 +1,31 @@
+# 레퍼런스 프로파일 P1~P7 (명세 3.5) — tools/design_space.py의 PROFILES에서 생성
+# 검사: python3 tools/design_space.py --check all
+profiles:
+  P1:
+    name: 개인 공방형
+    result: clean
+    axes: {A1: D4, A2: sandboxed, A3: client, A4: frame, A5: open, A6: fork, A7: proposed, A8: none, A9: sub, A10: none, A11: preview}
+  P2:
+    name: 팀 큐레이션형
+    result: clean
+    axes: {A1: D3, A2: decl, A3: hybrid, A4: none, A5: own, A6: lineage, A7: proposed, A8: tenant, A9: byok, A10: V2, A11: preview}
+  P3:
+    name: 기업 기밀형
+    result: clean
+    axes: {A1: D4, A2: sandboxed, A3: server, A4: proc, A5: hidden, A6: lineage, A7: proposed, A8: tenant, A9: tenant_cloud, A10: V2, A11: gated}
+  P4:
+    name: 대중 소비자형
+    result: clean
+    axes: {A1: D2, A2: decl, A3: server, A4: none, A5: open, A6: snapshot, A7: none, A8: public, A9: credits, A10: V1, A11: live}
+  P5:
+    name: 로컬 퍼스트 협업형
+    result: clean
+    axes: {A1: D3, A2: decl, A3: client, A4: none, A5: open, A6: crdt, A7: auto, A8: tenant, A9: byok, A10: none, A11: preview}
+  P6:
+    name: 마켓 플랫폼형
+    result: clean
+    axes: {A1: D4, A2: sandboxed, A3: hybrid, A4: frame, A5: own, A6: lineage, A7: proposed, A8: public, A9: credits, A10: V1, A11: gated}
+  P7:
+    name: 폐쇄망 공공형
+    result: clean
+    axes: {A1: D3, A2: decl, A3: server, A4: none, A5: hidden, A6: lineage, A7: proposed, A8: tenant, A9: tenant_cloud, A10: V3, A11: gated}

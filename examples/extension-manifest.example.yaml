@@ -1,0 +1,23 @@
+# 사이드바 '이번 주 완료한 일' 패널의 확장 매니페스트 예시 (명세 2.10)
+# 스키마: schemas/extension-manifest.schema.json
+id: weekly-done-panel
+version: "1.0.0"
+feature: f_01JBX7K2M9Q2
+depth: D3
+artifact:
+  form: decl
+  format: ui+json
+  entry: ui.json
+  catalog_id: "https://todo.example/catalogs/v3"
+points: [sidebar.panel]
+permissions: [tasks.read]
+network:
+  allow: []
+host_api: ">=1.2 <2"
+state:
+  schema_version: 1
+resources:
+  cpu_ms_per_event: 5
+  memory_mb: 8
+  startup_ms: 50
+label: badge_user_added

@@ -1,0 +1,18 @@
+name: check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: schemas, examples, forbidden-document regressions
+        run: python3 tools/check_schemas.py
+      - name: reference profiles P1~P7 stay clean
+        run: |
+          python3 tools/design_space.py --check all > profiles.json
+          python3 -c "import json,sys; d=json.load(open('profiles.json')); bad=[k for k,v in d.items() if v['result']!='clean']; print('not clean:', bad) if bad else print('P1~P7 clean'); sys.exit(1 if bad else 0)"
+      # ponytail: full enumeration (~minutes) not run in CI; add a job comparing against docs numbers if rules change often

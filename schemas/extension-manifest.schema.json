@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mallangable.ai/schemas/v0.1/extension-manifest.schema.json",
+  "title": "Mallangable 확장 매니페스트",
+  "description": "하나의 확장(산출물)이 무엇을, 어디에, 어떤 권한으로 하는지 선언한다. 런타임은 이 선언 밖의 행동을 허용하지 않는다 (명세 2.4, 5.3, 5.9).",
+  "type": "object",
+  "required": ["id", "version", "depth", "artifact", "points", "permissions", "host_api"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}$" },
+    "version": { "type": "string" },
+    "feature": { "type": "string", "description": "이 확장이 속한 기능 id" },
+    "depth": { "type": "string", "enum": ["D1", "D2", "D3", "D4", "D5"] },
+    "artifact": {
+      "type": "object",
+      "required": ["form"],
+      "additionalProperties": false,
+      "properties": {
+        "form": { "type": "string", "enum": ["decl", "sandboxed", "native"] },
+        "format": { "type": "string", "examples": ["tokens+json", "rules+json", "ui+json", "html-panel", "js-module", "wasm"] },
+        "entry": { "type": "string", "description": "산출물 진입 파일 (선언형이면 데이터 파일)" },
+        "catalog_id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:\\S+$", "description": "D3 산출물이 전제한 카탈로그. 기능 지도의 catalog_id와 다르면 G1에서 거부 (교차 문서 검사, 준수 검사기가 확인)" },
+        "content_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "공유·설치 시 내용 고정 (명세 7.7)" }
+      }
+    },
+    "points": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9_]+)+$" },
+      "description": "건드리는 확장 지점 id"
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9_*]+)+$" },
+      "description": "요구 기능 권한 id. 승인 전에는 브로커가 거부한다 (I4)"
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": { "type": "array", "items": { "type": "string", "pattern": "^(\\*\\.)?[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+$" }, "description": "허용 호스트 목록. 비어 있으면 외부 통신 없음. 맨 '*'처럼 모든 호스트를 여는 값은 허용 목록이 아니므로 거부한다(하위 도메인 와일드카드 '*.example.com'만 허용). 비어 있지 않으면 permissions에 risk=egress 기능이 반드시 있어야 한다. 스키마는 permissions가 비어 있지 않은지만 검사하고, egress 여부는 기능 지도를 보는 준수 검사기가 반드시(MUST) 확인한다" }
+      }
+    },
+    "host_api": { "type": "string", "description": "호환되는 기능 지도 버전 범위 (semver range)", "examples": [">=1.2 <2"] },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "type": "integer", "minimum": 1 },
+        "migrate_from": { "type": "array", "items": { "type": "integer" }, "description": "상태 인계를 지원하는 이전 스키마 버전 (명세 5.9)" }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cpu_ms_per_event": { "type": "integer", "minimum": 1 },
+        "memory_mb": { "type": "integer", "minimum": 1 },
+        "startup_ms": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "label": { "type": "string", "description": "화면에 표시할 '내가 추가한 기능' 표식 문구의 용어팩 id" }
+  },
+  "allOf": [
+    {
+      "description": "외부 통신을 열면 요구 권한이 있어야 한다 (I4). 그 권한이 egress인지는 준수 검사기가 확인",
+      "if": { "properties": { "network": { "properties": { "allow": { "minItems": 1 } }, "required": ["allow"] } }, "required": ["network"] },
+      "then": { "properties": { "permissions": { "minItems": 1 } } }
+    },
+    {
+      "description": "코드 산출물은 핫 스왑 때 상태 인계 규격(state.schema_version)을 선언해야 한다 (5.9). 버전 간 migrate_from 충분성은 준수 검사기가 확인",
+      "if": { "properties": { "artifact": { "properties": { "form": { "enum": ["sandboxed", "native"] } } } } },
+      "then": { "required": ["state"], "properties": { "state": { "required": ["schema_version"] } } }
+    },
+    {
+      "if": { "properties": { "depth": { "enum": ["D1", "D2"] } } },
+      "then": { "properties": { "artifact": { "properties": { "form": { "const": "decl" } } } } }
+    },
+    {
+      "description": "D1~D3은 선언형(2.6, 규칙 L3). 코드 산출물(sandboxed·native)이면 D4 이상으로 선언해야 한다",
+      "if": { "properties": { "depth": { "enum": ["D1", "D2", "D3"] } } },
+      "then": { "properties": { "artifact": { "properties": { "form": { "const": "decl" } } } } }
+    },
+    {
+      "description": "D4는 샌드박스 안의 코드(2.6). native는 D5 코어 포크 전용 (3장 A2)",
+      "if": { "properties": { "depth": { "const": "D4" } } },
+      "then": { "properties": { "artifact": { "properties": { "form": { "const": "sandboxed" } } } } }
+    },
+    {
+      "if": { "properties": { "depth": { "const": "D5" } } },
+      "then": { "properties": { "artifact": { "properties": { "form": { "const": "native" } } } } }
+    }
+  ]
+}
