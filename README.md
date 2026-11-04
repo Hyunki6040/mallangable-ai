@@ -1,218 +1,220 @@
 <div align="center">
 
+<!-- LANG-BAR -->
+**English** · [한국어](README.ko.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Español](README.es.md)
+<!-- /LANG-BAR -->
+
 # Mallangable-AI
 
-**사용자가 AI에게 말하면, 쓰고 있던 앱이 그 자리에서 바뀌고, 업데이트가 와도 살아남는다.**
+**A user tells the AI what they want, the app they are already using changes on the spot, and the change survives the next update.**
 
 *A vendor-neutral reference architecture for AI-driven malleable software.*
 
 [![check](https://github.com/Hyunki6040/mallangable-ai/actions/workflows/check.yml/badge.svg)](https://github.com/Hyunki6040/mallangable-ai/actions/workflows/check.yml)
-[![spec](https://img.shields.io/badge/spec-v0.2.2%20draft-orange)](CHANGELOG.md)
+[![spec](https://img.shields.io/badge/spec-v0.2.4%20draft-orange)](CHANGELOG.md)
 [![docs: CC BY 4.0](https://img.shields.io/badge/docs-CC%20BY%204.0-lightgrey)](LICENSE-docs)
 [![code: Apache-2.0](https://img.shields.io/badge/schemas%20%26%20tools-Apache--2.0-blue)](LICENSE)
 [![python](https://img.shields.io/badge/python-3.9%2B-3776AB)](tools/)
 
-[왜 필요한가](#왜-필요한가) · [핵심 아이디어](#핵심-아이디어) · [동작 방식](#동작-방식) · [빠른 시작](#빠른-시작) · [적용하기](#내-프로젝트에-적용하기) · [명세 읽기](#문서-지도) · [기여](CONTRIBUTING.md)
+[Why it matters](#why-it-matters) · [Core ideas](#core-ideas) · [How it works](#how-it-works) · [Quick start](#quick-start) · [Apply it](#applying-it-to-your-project) · [Read the spec](#document-map) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
-`말랑(mallang)` + `-able` = *malleable*. 두드려 펼 수 있는, 고쳐 쓸 수 있는 소프트웨어.
+`말랑(mallang)` + `-able` = *malleable*. "Mallang" is Korean for soft or squishy. Software you can hammer into shape and rework to fit.
 
-> **상태: v0.2.2 아키텍처 정의 초안** ([변경 기록](CHANGELOG.md)). 구현체가 아니라 **명세**입니다. 개념 모델, 설계 공간, 참조 아키텍처, JSON Schema, 계산 도구를 공개합니다. 특정 제품·모델 공급사·에이전트 런타임에 묶이지 않습니다.
+> **Status: v0.2.4 architecture definition draft** ([changelog](CHANGELOG.md)). This is a **specification**, not an implementation. It publishes a conceptual model, a design space, a reference architecture, JSON Schemas and calculation tools. It is not tied to any particular product, model vendor or agent runtime.
+>
+> **Editions**: English (default) · Korean (original) · Simplified Chinese · Japanese · Spanish. The spec chapters live in `docs/<language>/`. The Korean edition is the original and the others are translations. Where a translation differs from the original, the original prevails; please report differences as issues.
 
 ---
 
-## 왜 필요한가
+## Why it matters
 
-**AI 덕분에 코드는 싸졌습니다. 그런데 소프트웨어는 여전히 딱딱합니다.**
+**AI has made code cheap. Software is still rigid.**
 
-대량 생산된 소프트웨어는 평균 사용자에 맞춰 만들어집니다. 평균에서 멀수록 사람이 도구에 자기 일하는 방식을 맞춥니다. 이제 "이 목록을 마감순으로, 지난 건 빨갛게" 정도는 AI가 몇 초 만에 코드로 써 줍니다. 그래도 내가 매일 쓰는 앱은 바뀌지 않습니다. 앱 생성기는 *새* 앱을 만들 뿐, 이미 쓰는 앱을 고쳐 주지 않기 때문입니다. [Ink & Switch](https://www.inkandswitch.com/essay/malleable-software/)의 지적처럼 **코드 생성만으로는 소프트웨어가 말랑해지지 않습니다.**
+Mass-produced software is built for the average user. The further you are from the average, the more you bend your way of working to fit the tool. Today an AI can write the code for "sort this list by due date and show overdue items in red" in a few seconds. Yet the app I use every day does not change. App builders only make *new* apps; they do not fix the app you already use. As [Ink & Switch](https://www.inkandswitch.com/essay/malleable-software/) points out, **code generation alone does not make software malleable.**
 
-막히는 곳은 모델 성능이 아니라 **구조**입니다.
+What blocks it is not model capability but **structure**.
 
-| 결핍 | 지금 일어나는 일 |
+| Gap | What happens today |
 | --- | --- |
-| **넣을 자리가 없다** | AI가 기능을 만들어도 기존 앱에 끼울 구멍이 없습니다. 결국 코어 소스를 직접 패치합니다. |
-| **업데이트를 못 견딘다** | 제공사가 새 버전을 내면 사용자 수정이 깨집니다. 사용자 수천 명 × 릴리스마다 반복됩니다. |
-| **통제할 수 없다** | 누가 무엇을 바꿨는지, 그 코드가 무엇에 접근하는지, 비용은 누가 내는지 모릅니다. 2026년 초 한 에이전트 스킬 마켓에서는 감사 대상 2,857개 중 341개가 악성이었습니다([The Hacker News](https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html)). 원인은 "스킬이 에이전트 권한을 그대로 갖고 실행된다"는 구조였습니다. |
+| **No place to put it** | Even when the AI builds a feature, there is no slot to fit it into the existing app. People end up patching the core source directly. |
+| **Does not survive updates** | When the vendor ships a new version, user modifications break. Thousands of users × every release. |
+| **No control** | Nobody knows who changed what, what that code can access, or who pays. In early 2026, 341 of 2,857 audited skills on one agent skill marketplace were malicious ([The Hacker News](https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html)). The cause was structural: "skills run with the agent's full permissions." |
 
-세 결핍을 한꺼번에 풀어야 합니다. 하나만 풀면 나머지가 터집니다. 넣을 자리만 만들면 업데이트 때 깨지고, 업데이트를 견디게 하면 통제가 사라지고, 통제를 조이면 아무도 고치지 않습니다. Mallangable-AI는 이 셋을 **하나의 모델과 하나의 설계 공간**으로 다룹니다.
+All three gaps have to be solved together. Solve one and the others blow up. Add a place to put changes and they break on update; make them survive updates and control disappears; tighten control and nobody modifies anything. Mallangable-AI treats all three with **one model and one design space**.
 
-### 다른 방식과 무엇이 다른가
+### How it differs from other approaches
 
-| 방식 | 기존 앱을 고치나 | 업데이트 뒤에도 남나 | 위험 통제 |
+| Approach | Modifies the existing app | Survives updates | Risk control |
 | --- | :---: | :---: | :---: |
-| 설정(Settings) | 좁게 | 높음 | 높음 |
-| 플러그인 | 개발자만 | API가 바뀌면 깨짐 | 생태계마다 다름 |
-| 노코드 빌더 · 앱 생성기 | 아니오(새 앱) | 해당 없음 | 플랫폼 의존 |
-| 일회성 생성형 UI | 아니오(휘발) | 해당 없음 | 카탈로그로 제한 |
-| **Mallangable** | **예**, 확장 지점 안에서 | **설계 목표**(계약 보존 병합) | **정책 구간으로 조절** |
+| Settings | Narrowly | High | High |
+| Plugins | Developers only | Breaks when the API changes | Varies by ecosystem |
+| No-code builders · app generators | No (new app) | N/A | Platform-dependent |
+| One-off generative UI | No (ephemeral) | N/A | Limited by catalog |
+| **Mallangable** | **Yes**, within extension points | **Design goal** (contract-preserving merge) | **Tuned by policy intervals** |
 
-## 핵심 아이디어
+## Core ideas
 
-**1. 코어는 그대로 두고 레이어만 쌓는다.**
-사용자 수정은 제공사가 공개한 **확장 지점**(기능 지도, capability map) 안에서만 일어납니다. 코어를 패치하지 않으므로 제공사는 계속 업데이트를 낼 수 있습니다(불변식 I1).
+**1. Leave the core alone and stack layers.**
+User modifications happen only inside the **extension points** the vendor publishes (the capability map). Because the core is never patched, the vendor can keep shipping updates (invariant I1).
 
-**2. 모든 변경에는 '약속 목록(계약)'이 붙는다.**
-"이번 주 완료한 일만 보인다", "목록이 비면 안내 문구가 나온다"처럼 실행 가능한 검사 목록입니다. 계약이 있어야 업데이트·공유·승격 때 기계가 "제대로 합쳐졌는지" 판정할 수 있습니다. 계약 없는 변경은 켜지지 않습니다(I2). 병합 결과는 양쪽 계약을 모두 지켜야 하고, 못 지키면 사람에게 넘깁니다(I10).
+**2. Every change carries a "list of promises" (a contract).**
+An executable list of checks such as "only tasks completed this week are shown" or "an empty list shows a help message". With a contract, a machine can decide whether a change "merged correctly" during updates, sharing and promotion. A change without a contract is never activated (I2). A merge result must satisfy both sides' contracts; if it cannot, it goes to a person (I10).
 
-**3. 가장 약한 표현으로 만든다.**
-W3C의 [최소 권한 원칙(Rule of Least Power)](https://www.w3.org/2001/tag/doc/leastPower.html)을 사용자 변경에 적용했습니다. 깊이가 한 단계 오를 때마다 할 수 있는 일과 검증할 일이 함께 늘어납니다. D2로 되는 일을 D4로 만들면 거부합니다.
+**3. Build with the weakest expression that works.**
+This applies the W3C [Rule of Least Power](https://www.w3.org/2001/tag/doc/leastPower.html) to user changes. Each step up in depth increases both what can be done and what must be verified. Building with D4 what D2 can do is rejected.
 
-| 깊이 | 이름 | 산출물 | 예 |
+| Depth | Name | Artifact | Example |
 | --- | --- | --- | --- |
-| D1 | 외형 | 디자인 토큰 | "버튼을 크게, 주황색으로" |
-| D2 | 조합 | 기존 명령의 조합·단축키·규칙 | "버튼 하나로 내보내기 + 메일" |
-| D3 | 화면 | 승인된 컴포넌트 카탈로그 위의 선언형 UI | "오늘 마감 목록 패널" |
-| D4 | 동작 | 샌드박스 안의 코드, 권한은 명시한 것만 | "저장할 때 표 자동 정렬" |
-| D5 | 코어 | 코어 소스 수정 → 사용자 레이어가 아니라 **기능 요청**으로 수집 | "렌더링 엔진 교체" |
+| D1 | Appearance | Design tokens | "Make the button bigger and orange" |
+| D2 | Composition | Combinations of existing commands, shortcuts, rules | "One button to export + email" |
+| D3 | Screen | Declarative UI on an approved component catalog | "A panel listing today's deadlines" |
+| D4 | Behavior | Code in a sandbox, with only declared permissions | "Auto-sort the table on save" |
+| D5 | Core | Core source modification → collected as a **feature request**, not a user layer | "Replace the rendering engine" |
 
-**4. 통제는 스위치가 아니라 구간이다.**
-상위(제공사 → 조직 → 팀)는 상한을 좁히고, 사용자는 그 안에서 고릅니다. 하위 정책은 상위보다 넓어질 수 없습니다(I5). 그리고 **어떤 정책도 지울 수 없는 사용자 권리 하한**이 있습니다: 되돌리기(F1), 세이프 모드(F2), 누가 내 것을 보는지 고지(F3), 내보내기(F4), 권한 확인(F5), 비용 상한(F6), 쉬운 말 설명(F7).
+**4. Control is an interval, not a switch.**
+Upper levels (vendor → org → team) narrow the ceiling, and the user chooses within it. A lower policy can never be wider than its parent (I5). And there are **user floor rights that no policy can remove**: revert (F1), safe mode (F2), notice of who sees my work (F3), export (F4), permission view (F5), spend cap (F6), plain-language explanation (F7).
 
-**5. AI는 틀리고 속는다고 가정한다.**
-만든 AI와 판정하는 AI는 따로 둡니다(I7). 에이전트는 스스로 권한을 늘릴 수 없습니다(I4). 보면 안 되는 데이터는 에이전트 맥락에도 넣지 않습니다(I6). 사용자 기기의 검사는 안내일 뿐이고, 권위 있는 집행은 운영자가 통제하는 경계에서 합니다(I8).
+**5. Assume the AI is wrong and can be fooled.**
+The AI that builds and the AI that judges are kept separate (I7). An agent cannot raise its own permissions (I4). Data that must not be seen is never put into the agent's context either (I6). Checks on the user's device are only advisory; authoritative enforcement happens at a boundary the operator controls (I8).
 
-**6. 정답 하나가 아니라 계산 가능한 설계 공간을 준다.**
-개인 개발자 도구와 망 분리된 공공 시스템은 같은 구조를 쓸 수 없습니다. 그래서 11개 축의 조합 **1,944,000개**를 논리·안전 규칙으로 걸러 **권장 구성 36,772개**로 줄이고, 그 계산기를 함께 공개합니다. 설계 리뷰에서 "왜 이 조합인가"를 규칙 id로 답할 수 있습니다.
+**6. Not one right answer, but a computable design space.**
+A personal developer tool and an air-gapped public-sector system cannot use the same structure. So the **1,944,000** combinations of 11 axes are filtered by logical and safety rules down to **36,772 recommended configurations**, and the calculator is published alongside. In a design review, "why this combination?" can be answered with rule ids.
 
-## 동작 방식
+## How it works
 
 ```mermaid
 flowchart LR
-  U["사용자의 의도<br/>말하기 · 가리키기 · 보여 주기"] --> D["변경 δ<br/>의도 · 산출물 · 계약 · 권한 · 깊이"]
-  D --> G["검증 게이트 G0~G5<br/>정책 → 정적 → 계약 실행 → 비기능 → 판정 → 사람"]
-  G --> L["내 레이어에 기록<br/>언제든 되돌리기"]
-  L --> A["쓰던 앱이 바로 바뀜"]
-  B["새 기본판 도착"] --> M["계약 보존 병합<br/>양쪽 계약을 모두 지킴"]
+  U["User intent<br/>say · point · show"] --> D["Change δ<br/>intent · artifact · contract · permission · depth"]
+  D --> G["Verification gates G0~G5<br/>policy → static → contract run → non-functional → judging → human"]
+  G --> L["Recorded in my layer<br/>revert any time"]
+  L --> A["The app in use changes immediately"]
+  B["New baseline arrives"] --> M["Contract-preserving merge<br/>keeps both sides' contracts"]
   L --> M
   M --> A
 ```
 
-1. **의도**: 사용자가 말하거나, 화면을 가리키거나, 시연합니다.
-2. **생성**: 에이전트가 기능 지도를 보고 가장 낮은 깊이로 변경을 만듭니다. 변경 = 의도 + 산출물 + 계약 + 필요한 권한.
-3. **검증**: 게이트를 통과합니다. 생성 전에 정책 범위부터 확인하고(G0, 비용 0), 격리된 미리보기에서 계약을 실행하고(G2), 다른 AI가 출처를 모른 채 판정하고(G4), 권한이 늘면 사람이 승인합니다(G5).
-4. **기록**: 사용자 레이어에 쌓입니다. 직전 상태는 항상 남아 있어 되돌리기는 상수 시간에 끝납니다(I3).
-5. **업데이트 생존**: 새 기본판이 오면 비용이 낮은 순서로 해결을 시도합니다. 일반 3-way 병합 → 구문 인식 병합 → 스키마 키 단위 병합 → 검증된 해결 재사용 → 병합 에이전트 → 사람(R0~R5). 어느 단계든 결과는 양쪽 계약을 통과해야 합니다.
+1. **Intent**: the user speaks, points at the screen, or demonstrates.
+2. **Generation**: the agent reads the capability map and builds the change at the lowest depth. Change = intent + artifact + contract + required permissions.
+3. **Verification**: the change passes the gates. Policy scope is checked before generation (G0, zero cost), the contract runs in an isolated preview (G2), a different AI judges without knowing the source (G4), and a person approves if permissions increase (G5).
+4. **Recording**: the change is stacked on the user layer. The previous state is always kept, so revert finishes in constant time (I3).
+5. **Surviving updates**: when a new baseline arrives, resolution is tried in order of increasing cost. Plain 3-way merge → syntax-aware merge → schema key-level merge → reuse of a verified resolution → merge agent → human (R0~R5). At every step, the result must pass both sides' contracts.
 
-### 변경 하나는 이렇게 생겼습니다
+### What one change looks like
 
 ```yaml
-# examples/change.example.yaml (발췌) — schemas/change-record.schema.json 으로 검증
+# examples/change.example.yaml (excerpt, values translated into English) — validated by schemas/change-record.schema.json
 id: chg_01JBX7M0A1
-summary: 이번 주 완료한 일 패널 추가
-intent: 주간 회고 때 이번 주 완료 항목을 한눈에 보고 싶다
-depth: D3                     # 선언형 화면. 코드 없음
-points: [sidebar.panel]       # 호스트가 공개한 확장 지점
-contract:                     # 업데이트·병합 때 다시 실행되는 약속
+summary: Add a "done this week" panel
+intent: I want to see this week's completed items at a glance during the weekly retro
+depth: D3                     # declarative screen. no code
+points: [sidebar.panel]       # extension point published by the host
+contract:                     # promises re-run on update and merge
   - id: only-this-week
     check: tree-query
     selector: "sidebar.panel[ext=weekly-done-panel] list > item"
     assert: count == 2
-    given: 이번 주 완료 2건, 지난주 완료 1건
-    expect: 패널 목록에 2건만 표시
+    given: 2 completed this week, 1 completed last week
+    expect: only 2 items shown in the panel list
 ```
 
 ---
 
-## Abstract (English)
+## Abstract
 
 AI has made code cheap, but software is still rigid. App builders generate *new* apps; they do not let people reshape the tools they already use, and nothing keeps those personal changes alive when the vendor ships an update. Mallangable-AI is a vendor-neutral reference architecture for **malleable software driven by AI agents**. It defines (1) a formal model of hosts, layers, changes, contracts and policies with ten invariants; (2) a five-level change-depth hierarchy that applies the Rule of Least Power to user modifications; (3) an eleven-axis design space whose 1,944,000 raw combinations reduce to 36,772 recommended configurations in 863 structural families, with a calculator to recompute them; (4) an interval-delegation control model with user floor rights no policy can remove; (5) a six-plane reference architecture with ports, a vendor-neutral harness event model and verification gates; (6) contract-preserving merges and lineage propagation so changes survive upstream releases; (7) experience rules for input surfaces, waiting, plain-language vocabulary packs and model connection; and (8) a coupling matrix between twenty business models and the architecture choices they require.
 
-**한국어 번역**
-
-AI 덕분에 코드는 싸졌지만 소프트웨어는 여전히 딱딱합니다. 앱 생성기는 *새* 앱을 만들 뿐, 사람들이 이미 쓰는 도구를 고쳐 쓰게 해 주지 않고, 제공사가 업데이트를 내면 그 개인 수정을 지켜 주는 장치도 없습니다. Mallangable-AI는 **AI 에이전트가 이끄는 말랑한 소프트웨어**를 위한 벤더 중립 참조 아키텍처입니다. 이 명세는 (1) 호스트·레이어·변경·계약·정책의 형식 모델과 불변식 10개, (2) 최소 권한 원칙(Rule of Least Power)을 사용자 수정에 적용한 5단계 변경 깊이 계층, (3) 원시 조합 1,944,000개가 구조 패밀리 863개·권장 구성 36,772개로 줄어드는 11축 설계 공간과 이를 다시 계산하는 도구, (4) 어떤 정책도 지울 수 없는 사용자 권리 하한을 가진 구간 위임 통제 모델, (5) 포트·벤더 중립 하네스 이벤트 모델·검증 게이트를 갖춘 6평면 참조 아키텍처, (6) 상위 릴리스 뒤에도 변경이 살아남게 하는 계약 보존 병합과 계보 전파, (7) 입력 표면·기다림 표현·일반 용어팩·모델 연결에 관한 경험 규칙, (8) 사업 모델 20개와 그것이 요구하는 아키텍처 선택 사이의 결합 행렬을 정의합니다.
-
 ---
 
-## 문서 지도
+## Document map
 
-| 장 | 내용 | 먼저 읽을 사람 |
+| Chapter | Contents | Who should read first |
 | --- | --- | --- |
-| [1. 서론](docs/01-introduction.md) | 문제, 정의, 기여, 관련 연구 | 모두 |
-| [2. 핵심 모델](docs/02-core-model.md) | 행위자·호스트·레이어·변경·계약·깊이·정책·생애주기·불변식 I1~I10 | 아키텍트 |
-| [3. 설계 공간](docs/03-design-space.md) | 11개 축, 제약 L/N/S, 조합의 수, 레퍼런스 프로파일 P1~P7, 선택 절차 | 제품 리더, 아키텍트 |
-| [4. 통제 스펙트럼](docs/04-control-spectrum.md) | 구간 위임, 손잡이 카탈로그, 프리셋, 결정 주체, 사용자 권리 하한 F1~F7 | 제품·보안·관리자 |
-| [5. 참조 아키텍처](docs/05-reference-architecture.md) | 6평면, 배치, 포트 인터페이스, 흐름, 하네스 이벤트 모델, 역할, 게이트, 런타임 | 엔지니어 |
-| [6. 버전과 계보](docs/06-versioning-and-lineage.md) | 토폴로지, 계보, 전파 알고리즘, 해결 사다리, 계약 보존 병합, 비용 모델, 공유, 승격 | 엔지니어 |
-| [7. 신뢰와 보안](docs/07-trust-and-security.md) | 위협 모델, 치명적 3요소 끊기, 계획·실행 분리, 정보 흐름 라벨, 공급망 | 보안 |
-| [8. 경험 설계](docs/08-experience-design.md) | 입력 표면, 시간 등급 T0~T4, 생성 과정 표현, 영수증, 용어팩, AI 엔진 연결 | 디자이너, PM |
-| [9. 비즈니스 결합](docs/09-business-coupling.md) | BM 20개, 프로파일×BM 행렬, 비전형 BM, 요금제=정책 상한 | 창업자, 사업 |
-| [10. 열린 문제](docs/10-open-problems.md) | 열린 문제 13개, Mallang-Bench, 준수 등급, 로드맵 | 연구자, 기여자 |
-| [조사 노트](docs/research/) | Harness² 분석, ThinkRail 분석, 선행 사례 조사, 적대적 평가 | 기여자, 리뷰어 |
-| [용어집](docs/glossary.md) · [참고 문헌](docs/references.md) | | |
+| [1. Introduction](docs/en/01-introduction.md) | Problem, definition, contributions, related work | Everyone |
+| [2. Core model](docs/en/02-core-model.md) | Actors, host, layers, changes, contracts, depth, policy, lifecycle, invariants I1~I10 | Architects |
+| [3. Design space](docs/en/03-design-space.md) | 11 axes, constraints L/N/S, number of combinations, reference profiles P1~P7, selection procedure | Product leaders, architects |
+| [4. Control spectrum](docs/en/04-control-spectrum.md) | Interval delegation, knob catalog, presets, decision makers, user floor rights F1~F7 | Product, security, admins |
+| [5. Reference architecture](docs/en/05-reference-architecture.md) | 6 planes, deployment, port interfaces, flows, harness event model, roles, gates, runtime | Engineers |
+| [6. Versioning and lineage](docs/en/06-versioning-and-lineage.md) | Topology, lineage, propagation algorithm, resolution ladder, contract-preserving merge, cost model, sharing, promotion | Engineers |
+| [7. Trust and security](docs/en/07-trust-and-security.md) | Threat model, breaking the lethal trifecta, plan/execute separation, information-flow labels, supply chain | Security |
+| [8. Experience design](docs/en/08-experience-design.md) | Input surfaces, time tiers T0~T4, showing generation progress, receipts, lexicon packs, AI engine connection | Designers, PMs |
+| [9. Business coupling](docs/en/09-business-coupling.md) | 20 BMs, profile × BM matrix, atypical BMs, pricing plan = policy ceiling | Founders, business |
+| [10. Open problems](docs/en/10-open-problems.md) | 13 open problems, Mallang-Bench, conformance levels, roadmap | Researchers, contributors |
+| [Research notes](docs/en/research/) | Harness² analysis, ThinkRail analysis, prior-art survey, adversarial review | Contributors, reviewers |
+| [Glossary](docs/en/glossary.md) · [References](docs/en/references.md) | | |
 
-## 숫자로 보는 설계 공간
+## The design space in numbers
 
-`tools/design_space.py`로 계산한 값입니다(3장).
+Values computed with `tools/design_space.py` (chapter 3).
 
-| | 값 |
+| | Value |
 | --- | ---: |
-| 설계 축 | 11개 |
-| 원시 조합 | 1,944,000 |
-| 논리적으로 성립 | 103,320 (5.31%) |
-| 안전 규범까지 충족 | 61,064 (3.14%) |
-| 경고 없이 권장 | **36,772 (1.89%)** |
-| 구조 패밀리 | 863 |
-| 구조를 정한 뒤 남는 사업·정책 선택지 | 평균 57% |
+| Design axes | 11 |
+| Raw combinations | 1,944,000 |
+| Logically valid | 103,320 (5.31%) |
+| Also meet safety norms | 61,064 (3.14%) |
+| Recommended with no warnings | **36,772 (1.89%)** |
+| Structural families | 863 |
+| Business and policy options left once the structure is fixed | 57% on average |
 
-대표적인 설계 모순은 **"소스는 숨기고 싶은데 AI는 사용자 기기에서 돌리고 싶다"** 입니다(규칙 L1). 성립하지 않습니다. 원시 조합을 가장 많이 걸러 내는 규칙은 깊이와 표현을 맞추는 L3·L4입니다(3.4, 순서와 무관한 독립 위반 수 기준).
+The archetypal design contradiction is **"I want to hide the source, but I want the AI to run on the user's device"** (rule L1). It cannot hold. The rules that filter out the most raw combinations are L3 and L4, which match depth to representation (3.4, counted by order-independent independent violations).
 
-## 레퍼런스 프로파일
+## Reference profiles
 
-| | 대표 상황 | 에이전트 | 토폴로지 | 가시성 | 모델 조달 |
+| | Typical situation | Agent | Topology | Visibility | Model sourcing |
 | --- | --- | --- | --- | --- | --- |
-| P1 개인 공방형 | 개발자 도구, 내 AI 구독으로 고침 | 기기 | fork | 전부 공개 | 사용자 구독 |
-| P2 팀 큐레이션형 | 사내 업무 도구, 팀 기본판 | 혼합 | lineage | 내 것만 | BYOK |
-| P3 기업 기밀형 | 소스 비공개 계약 | 서버 | lineage | 숨김 | 테넌트 클라우드 |
-| P4 대중 소비자형 | 수백만 사용자, 테마·규칙 공유 | 서버 | snapshot | 공개 | 크레딧 |
-| P5 로컬 퍼스트 협업형 | 실시간 협업 문서 | 기기 | crdt | 공개 | BYOK |
-| P6 마켓 플랫폼형 | 사용자 확장 공개 마켓 | 혼합 | lineage | 내 것만 | 크레딧 |
-| P7 폐쇄망 공공형 | 망 분리, 사내 모델 | 서버 | lineage | 숨김 | 사내 모델 |
+| P1 Personal workshop | Developer tools, modified with my own AI subscription | Device | fork | Fully public | User subscription |
+| P2 Team-curated | Internal business tools, team baseline | Mixed | lineage | Mine only | BYOK |
+| P3 Enterprise confidential | Source-closed contract | Server | lineage | Hidden | Tenant cloud |
+| P4 Mass consumer | Millions of users, sharing themes and rules | Server | snapshot | Public | Credits |
+| P5 Local-first collaborative | Real-time collaborative documents | Device | crdt | Public | BYOK |
+| P6 Marketplace platform | Public marketplace of user extensions | Mixed | lineage | Mine only | Credits |
+| P7 Air-gapped public sector | Network separation, in-house model | Server | lineage | Hidden | In-house model |
 
-전체 11축 값은 [`examples/profiles.yaml`](examples/profiles.yaml).
+Full values for all 11 axes are in [`examples/profiles.yaml`](examples/profiles.yaml).
 
-## 아키텍처 카드
+## Architecture card
 
-새 모델을 공개할 때 모델 카드를 붙이듯, 이 아키텍처의 쓰임과 한계를 적어 둡니다.
+Just as a model card accompanies a new model release, this records the intended use and limits of the architecture.
 
-| 항목 | 내용 |
+| Item | Contents |
 | --- | --- |
-| 의도된 용도 | 이미 존재하는 소프트웨어(웹·데스크톱·모바일·사내 도구)에 AI 기반 사용자 수정 기능을 넣으려는 제공사·플랫폼 팀의 초기 아키텍처 설계 |
-| 범위 밖 | 프롬프트로 새 앱을 통째로 만드는 앱 생성기, 저장되지 않는 일회성 생성형 UI, 격리 없이 코드를 실행하는 플러그인 마켓 |
-| 전제 | 호스트가 기능 지도(확장 지점·권한)를 노출할 수 있다. 통제가 필요한 배포에는 운영자가 통제하는 서버 경계가 있다. 모델은 틀릴 수 있고 인젝션에 취약하다 |
-| 알려진 한계 | 약한 계약은 병합을 통과시키면서 기능을 망가뜨린다(조용한 파손). 사용자 기기의 통제는 우회 가능하다. 기기로 내려가는 실행 번들은 분석될 수 있다. 의미 충돌·기능 상호작용 탐지는 미해결 |
-| 평가 | Mallang-Bench 지표(10장). 조용한 파손률(SBR)을 사람 개입률과 함께 보고 |
-| 사회적 위험 | 구성원 감시 도구로 쓰일 위험, 노동 모니터링 규제, 접근성 회귀, 후원 기본값에 의한 추천 왜곡 |
-| 완화 | 가시성 상시 고지(F3), 권한 증가 사람 승인(I4), 접근성 게이트(G3), 후원 표시 의무 |
-| 정책 의존성 | 모델 공급사의 구독·API 약관은 자주 바뀐다. 모델 조달은 포트로 추상화하고 최소 두 경로를 유지할 것 |
+| Intended use | Early architecture design by vendors and platform teams that want to add AI-driven user modification to existing software (web, desktop, mobile, internal tools) |
+| Out of scope | App generators that build a whole new app from a prompt, one-off generative UI that is never saved, plugin marketplaces that run code without isolation |
+| Assumptions | The host can expose a capability map (extension points, permissions). Deployments that need control have a server boundary controlled by the operator. Models can be wrong and are vulnerable to injection |
+| Known limitations | Weak contracts let merges pass while breaking features (silent breakage). Controls on the user's device can be bypassed. Execution bundles shipped to the device can be analyzed. Detection of semantic conflicts and feature interactions is unsolved |
+| Evaluation | Mallang-Bench metrics (chapter 10). Report the silent breakage rate (SBR) together with the human intervention rate |
+| Social risks | Use as a tool for surveilling members, labor-monitoring regulation, accessibility regressions, recommendation bias from sponsored defaults |
+| Mitigations | Always-on visibility notice (F3), human approval for permission increases (I4), accessibility gate (G3), mandatory sponsorship labeling |
+| Policy dependencies | Model vendors' subscription and API terms change often. Abstract model sourcing behind a port and keep at least two paths |
 
-## 빠른 시작
+## Quick start
 
 ```bash
 git clone https://github.com/Hyunki6040/mallangable-ai.git && cd mallangable-ai
-python3 tools/design_space.py --check all     # 표준 라이브러리만. P1~P7 검사
-python3 tools/design_space.py --markdown      # 조합의 수와 규칙별 통계 (전체 열거, 몇 분 걸림)
-python3 tools/design_space.py --bm            # 프로파일 × 사업 모델 행렬
-pip install -r requirements.txt && python3 tools/check_schemas.py   # 예시 9개 통과 + 금지 문서 거부 회귀 검사
+python3 tools/design_space.py --check all     # stdlib only. checks P1~P7
+python3 tools/design_space.py --markdown      # combination counts and per-rule stats (full enumeration, takes a few minutes)
+python3 tools/design_space.py --bm            # profile × business model matrix
+pip install -r requirements.txt && python3 tools/check_schemas.py   # 9 examples pass + regression check that forbidden documents are rejected
 ```
 
-## 내 프로젝트에 적용하기
+## Applying it to your project
 
-필요한 만큼만 가져가면 됩니다. 아래 단계는 독립적이며, 위로 갈수록 가볍습니다.
+Take only as much as you need. The steps below are independent, and the higher ones are lighter.
 
-| 단계 | 가져가는 것 | 할 일 | 결과물 |
+| Step | What you take | What to do | Result |
 | --- | --- | --- | --- |
-| 1. 어휘 | 용어·식별자 | 설계 문서에서 `D1~D5`, `I1~I10`, `F1~F7`, 규칙 id를 그대로 인용 | "D4 기능은 G5 통과 필요(5.8)"처럼 근거가 붙은 리뷰 |
-| 2. 설계 공간 | `tools/design_space.py` | 내 제품의 11축 값을 정해 검사 | 커밋 가능한 프로파일 JSON과 위반·경고 id |
-| 3. 계산기 확장 | 축·규칙 | 파일을 복사해 `AXES`·`normative()`에 우리 옵션·안전 원칙 추가 | 우리 조직용 권장 조합 수와 규칙 통계 |
-| 4. 데이터 계약 | `schemas/` | 기능 지도·매니페스트·변경 기록·정책·용어팩을 스키마로 검증 | 구현 사이에 주고받을 수 있는 문서 형식 |
-| 5. 아키텍처 | 5~7장 | 6평면·포트·게이트를 내 스택에 대응시키고, 하네스 이벤트 대응표(5.6) 작성 | 구성 요소 지도, 위협 모델 점검표 |
-| 6. 준수 주장 | 10.3 | Core → Governed → Sealed 등급 조건을 항목별로 확인 | "Mallangable Core (v0.2.2) 준수"라는 검증 가능한 주장 |
+| 1. Vocabulary | Terms, identifiers | Cite `D1~D5`, `I1~I10`, `F1~F7` and rule ids verbatim in design documents | Reviews with grounds attached, such as "a D4 feature must pass G5 (5.8)" |
+| 2. Design space | `tools/design_space.py` | Choose your product's 11 axis values and check them | A committable profile JSON and violation/warning ids |
+| 3. Extend the calculator | Axes, rules | Copy the file and add your options and safety principles to `AXES` and `normative()` | Recommended combination counts and rule stats for your org |
+| 4. Data contracts | `schemas/` | Validate capability maps, manifests, change records, policies and lexicon packs against the schemas | Document formats that implementations can exchange |
+| 5. Architecture | Chapters 5~7 | Map the 6 planes, ports and gates onto your stack, and write a harness event mapping table (5.6) | A component map and a threat-model checklist |
+| 6. Conformance claim | 10.3 | Check the Core → Governed → Sealed level conditions item by item | A verifiable claim such as "Conforms to Mallangable Core (v0.2.4)" |
 
-### 2단계: 내 제품을 설계 공간에 놓기
+### Step 2: Place your product in the design space
 
-축 정의(3.2)를 보고 값을 고른 뒤 파일로 저장합니다. 리뷰·ADR에 함께 커밋하면 "왜 이 조합인가"를 규칙 id로 답할 수 있습니다.
+Read the axis definitions (3.2), pick values and save them to a file. Commit it with your review or ADR and you can answer "why this combination?" with rule ids.
 
 ```bash
 cat > my-product.profile.json <<'EOF'
@@ -221,124 +223,125 @@ cat > my-product.profile.json <<'EOF'
 EOF
 python3 tools/design_space.py --profile my-product.profile.json
 # → "result": "logical", "violated": "L1"
-#   소스를 숨기려면(A5=hidden) 코드를 만지는 에이전트가 서버에 있어야 한다(A3=server)
+#   to hide the source (A5=hidden), the agent that touches code must be on the server (A3=server)
 ```
 
-결과는 `clean`(권장) · `warned`(경고 `S*`) · `normative`(안전 원칙 위반 `N*`) · `logical`(성립 불가 `L*`) 중 하나이고, 성립하면 사업 모델 20개와의 결합도 함께 나옵니다. 종료 코드는 `clean`·`warned`면 0, 그 밖(`normative`·`logical`·입력 오류)이면 1이라 CI 게이트로 바로 쓸 수 있습니다. 중복 키나 객체가 아닌 JSON은 입력 오류로 거부합니다. 가장 가까운 레퍼런스 프로파일(P1~P7)에서 출발해 한 축씩 바꿔 보는 것이 빠릅니다.
+The result is one of `clean` (recommended) · `warned` (warnings `S*`) · `normative` (safety principle violation `N*`) · `logical` (infeasible `L*`). If the profile is feasible, its coupling with the 20 business models is reported too. The exit code is 0 for `clean` or `warned` and 1 otherwise (`normative`, `logical`, input error), so it works directly as a CI gate. Duplicate keys or JSON that is not an object are rejected as input errors. Starting from the nearest reference profile (P1~P7) and changing one axis at a time is the fastest way.
 
-### 3단계: 계산기를 우리 조직에 맞게 고치기
+### Step 3: Adapt the calculator to your org
 
-`tools/design_space.py`는 파일 하나, 의존성 없음입니다. 복사해서 고치세요.
+`tools/design_space.py` is a single file with no dependencies. Copy it and edit it.
 
-- 옵션 추가: `AXES`의 목록에 값을 넣습니다(예: A9에 `"partner_api"`).
-- 우리 안전 원칙: `normative()`에 `N` 규칙을 추가합니다. 새 id는 기존 번호 뒤에 붙입니다(`N7`, `N8` …).
-- 권장하지 않는 조합: `soft()`에 `S` 경고를 추가합니다.
-- `LOGICAL_RULES`의 **순서는 바꾸지 않습니다**("첫 위반" 집계가 순서에 의존). 주장에는 순서와 무관한 독립·유일 위반 수를 쓰세요.
+- Add an option: put a value into the list in `AXES` (e.g. `"partner_api"` for A9).
+- Your own safety principles: add `N` rules to `normative()`. New ids go after the existing numbers (`N7`, `N8` …).
+- Discouraged combinations: add `S` warnings to `soft()`.
+- **Do not change the order** of `LOGICAL_RULES` (the "first violation" counts depend on it). For claims, use the order-independent independent and unique violation counts.
 
-### 4단계: 내 문서를 스키마로 검증하기
+### Step 4: Validate your documents against the schemas
 
-`examples/`를 복사해 내 호스트에 맞게 고친 뒤 검증합니다. YAML·JSON 모두, 한 파일에 여러 문서(`---`)도 됩니다.
+Copy `examples/`, adapt it to your host and validate. Both YAML and JSON work, including several documents (`---`) in one file.
 
 ```bash
 python3 tools/check_schemas.py capability-map  my-app/capability-map.yaml
 python3 tools/check_schemas.py extension-manifest my-app/extensions/*.yaml
 python3 tools/check_schemas.py policy          my-app/policy.yaml
-# 스키마: capability-map | change-record | extension-manifest | lexicon-pack | policy
+# schemas: capability-map | change-record | extension-manifest | lexicon-pack | policy
 ```
 
-어느 언어에서든 JSON Schema draft 2020-12 검증기로 `schemas/*.json`을 그대로 쓸 수 있습니다. 스키마의 `$id`(`https://mallangable.ai/schemas/v0.1/…`)는 식별자이며 내려받을 수 있는 주소가 아닙니다. 저장소 파일을 직접 참조하거나 복사해 고정하세요.
+Any JSON Schema draft 2020-12 validator, in any language, can use `schemas/*.json` as is. A schema's `$id` (`https://mallangable.ai/schemas/v0.1/…`) is an identifier, not a downloadable address. Reference the repository files directly or copy and pin them.
 
-**스키마만으로는 부족합니다.** 문서 사이를 비교해야 하는 규칙(I5 정책 포함 관계, I7 생성자 ≠ 판정자)은 JSON Schema로 표현할 수 없어 `check_schemas.py`가 `ACCEPTED (validator MUST check)`로 표시합니다. 런타임 검증기에서 반드시 따로 검사하세요.
+**Schemas alone are not enough.** Rules that require comparing documents (I5 policy containment, I7 generator ≠ judge) cannot be expressed in JSON Schema, so `check_schemas.py` marks them `ACCEPTED (validator MUST check)`. A runtime validator **MUST** check them separately.
 
-외부에서 받은 문서를 검증할 때를 위해 `check_schemas.py`는 YAML 별칭(`*ref`)과 1 MiB 넘는 파일을 거부하고, 출력의 제어 문자·개행을 이스케이프합니다(문서 키로 터미널 제어 문자나 GitHub Actions `::error::` 주석을 끼워 넣지 못함). 판정은 출력 문구가 아니라 종료 코드(0 통과, 1 실패)로 읽으세요.
+For validating documents received from outside, `check_schemas.py` rejects YAML aliases (`*ref`) and files over 1 MiB, and escapes control characters and newlines in its output (so document keys cannot inject terminal control characters or GitHub Actions `::error::` annotations). Read the verdict from the exit code (0 pass, 1 fail), not from the output text.
 
-### 5단계: 아키텍처를 내 스택에 대응시키기
+### Step 5: Map the architecture onto your stack
 
-- [5장](docs/05-reference-architecture.md)의 포트(`ModelPort`, `SandboxHost`, `PolicyDecisionPoint` …)마다 우리 구현체를 적습니다. 포트 뒤 구현은 자유입니다.
-- 쓰는 에이전트 런타임의 이벤트를 하네스 이벤트 모델(5.6)에 대응시킵니다. AG-UI·A2A·MCP 대응표가 예시입니다.
-- [7장](docs/07-trust-and-security.md) 위협 모델을 점검표로 씁니다. 특히 사용자 기기의 검사는 안내일 뿐이고 권위 있는 집행은 운영자 경계에서 한다는 점(I8)을 확인하세요.
+- For each port in [chapter 5](docs/en/05-reference-architecture.md) (`ModelPort`, `SandboxHost`, `PolicyDecisionPoint` …), write down your implementation. What sits behind a port is up to you.
+- Map the events of the agent runtime you use onto the harness event model (5.6). The AG-UI, A2A and MCP mapping tables are examples.
+- Use the threat model in [chapter 7](docs/en/07-trust-and-security.md) as a checklist. In particular, confirm that checks on the user's device are only advisory and that authoritative enforcement happens at the operator boundary (I8).
 
-### 이 명세가 맞지 않는 경우
+### When this spec does not fit
 
-프롬프트로 새 앱을 통째로 만드는 앱 생성기, 저장되지 않는 일회성 생성형 UI, 격리 없이 코드를 실행하는 플러그인 마켓은 범위 밖입니다(아래 아키텍처 카드). 호스트가 확장 지점을 노출할 수 없다면 1~3단계만 쓰세요.
+App generators that build a whole new app from a prompt, one-off generative UI that is never saved, and plugin marketplaces that run code without isolation are out of scope (see the architecture card above). If your host cannot expose extension points, use only steps 1~3.
 
-## 저장소 구조
+## Repository layout
 
 ```text
 mallangable-ai/
-├── README.md · CHANGELOG.md · CONTRIBUTING.md · CITATION.cff
+├── README.md · CHANGELOG.md · CONTRIBUTING.md   # English (default). Other editions are README.<lang>.md etc.
+├── CITATION.cff
 ├── LICENSE                    # Apache-2.0 (schemas/, examples/, tools/)
-├── LICENSE-docs               # CC BY 4.0 (docs/, README 등 문서)
-├── requirements.txt           # check_schemas.py 의존성
-├── .github/                   # CI(check.yml, 읽기 전용 토큰), 이슈 템플릿
-├── .claude/skills/security-audit/  # Cloudflare 보안 감사 스킬 (MIT, 원본 고정, 수정 금지)
-├── docs/                      # 명세 본문 (1~10장, 용어집, 참고 문헌)
+├── LICENSE-docs               # CC BY 4.0 (docs/, README and other documents)
+├── requirements.txt           # check_schemas.py dependencies
+├── .github/                   # CI (check.yml, read-only token), issue templates
+├── .claude/skills/security-audit/  # Cloudflare security audit skill (MIT, pinned upstream, do not modify)
+├── docs/<lang>/               # spec chapters (1~10, glossary, references). en · ko (original) · zh-CN · ja · es
 ├── schemas/                   # JSON Schema (draft 2020-12)
 │   ├── capability-map.schema.json
 │   ├── extension-manifest.schema.json
 │   ├── change-record.schema.json
 │   ├── policy.schema.json
 │   └── lexicon-pack.schema.json
-├── examples/                  # 스키마를 통과하는 예시
+├── examples/                  # examples that pass the schemas
 │   ├── capability-map.example.yaml
 │   ├── extension-manifest.example.yaml
 │   ├── change.example.yaml
 │   ├── policy.example.yaml
-│   ├── lexicon.ko.yaml
+│   ├── lexicon.{en,ko,zh-CN,ja,es}.yaml
 │   └── profiles.yaml
-├── docs/research/             # 조사 노트 (Harness² 분석, ThinkRail 분석, 선행 사례 조사, 적대적 평가)
+├── docs/<lang>/research/       # research notes (Harness² analysis, ThinkRail analysis, prior-art survey, adversarial review)
 └── tools/
-    ├── design_space.py        # 설계 공간 · BM 결합 계산기 (표준 라이브러리만)
-    └── check_schemas.py       # 예시 검증 + 금지 문서 거부 회귀 검사 / 내 문서 검증
+    ├── design_space.py        # design space · BM coupling calculator (stdlib only)
+    └── check_schemas.py       # example validation + forbidden-document rejection regression check / validate your documents
 ```
 
-## 보안 감사
+## Security audit
 
-[cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill)을 `.claude/skills/security-audit/`에 고정해 두었습니다(`UPSTREAM`에 원본 커밋, 라이선스 MIT). Claude Code에서 "이 저장소 보안 감사해줘"라고 하면 이 스킬의 6단계(정찰 → 커버리지 원장 → 사냥 → 후보 검증 → findings.json → 보고서)가 돕니다. 대상 코드는 네트워크 없는 읽기 전용 샌드박스에서만 실행합니다.
+[cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) is pinned at `.claude/skills/security-audit/` (upstream commit in `UPSTREAM`, MIT license). In Claude Code, asking "run a security audit on this repo" runs the skill's six stages (recon → coverage ledger → hunt → candidate verification → findings.json → report). Target code runs only in a read-only sandbox with no network.
 
-첫 감사(2026-11-05, quick 프로파일, 부분 감사) 결과와 반영 내역은 [`docs/research/security-audit-2026-11-05.md`](docs/research/security-audit-2026-11-05.md)에 있습니다.
+The results of the first audit (2026-11-05, quick profile, partial audit) and the fixes applied are in [`docs/en/research/security-audit-2026-11-05.md`](docs/en/research/security-audit-2026-11-05.md).
 
-## 로드맵
+## Roadmap
 
-| 버전 | 목표 |
+| Version | Goal |
 | --- | --- |
-| **v0.2 (현재)** | 개념 모델·설계 공간·참조 아키텍처, 실행 가능한 계약 스키마, 금지 문서 회귀 검사 |
-| v0.3 | 기능 지도 형식 확정, 참조 호스트 앱, 준수 검사 세트, Mallang-Bench 알파 |
-| v1.0 | 외부 구현 2개 이상이 Core 등급 통과, 기록 규격 동결 |
+| **v0.2 (current)** | Conceptual model, design space, reference architecture, executable contract schemas, forbidden-document regression checks |
+| v0.3 | Finalized capability map format, reference host app, conformance test suite, Mallang-Bench alpha |
+| v1.0 | At least 2 external implementations pass the Core level, record format frozen |
 
-아직 풀지 못한 문제(계약이 충분한지 판정하기, 기능 사이 상호작용 탐지, 프라이버시를 지키는 승격 등 13개)는 [10장](docs/10-open-problems.md)에 있습니다.
+The problems not yet solved (deciding whether a contract is sufficient, detecting interactions between features, privacy-preserving promotion and 13 in total) are in [chapter 10](docs/en/10-open-problems.md).
 
-## 표기
+## Notation
 
-- 축 `A1~A11`, 제약 `L`(논리)·`N`(규범)·`S`(경고), 불변식 `I1~I10`, 사용자 권리 하한 `F1~F7`, 게이트 `G0~G5`, 해결 단계 `R0~R5`, 프로파일 `P1~P7`, 사업 모델 `B1~B20`.
-- 출처 링크가 없는 수치(크기 상한, 점수 가중치, 비용 예시)는 **설계 제안값**입니다.
-- 요구 수준: 반드시(MUST) · 해야 함(SHOULD) · 할 수 있음(MAY).
+- Axes `A1~A11`, constraints `L` (logical) · `N` (normative) · `S` (warning), invariants `I1~I10`, user floor rights `F1~F7`, gates `G0~G5`, resolution steps `R0~R5`, profiles `P1~P7`, business models `B1~B20`.
+- Numbers without a source link (size limits, score weights, cost examples) are **design proposal values**.
+- Requirement levels: **MUST** · **SHOULD** · **MAY**.
 
-## 기여
+## Contributing
 
-환영하는 기여:
-- **열린 문제** O1(계약 충분성), O3(기능 상호작용), O7(프라이버시 보존 승격)에 대한 방법과 실험
-- 다른 에이전트 런타임의 **하네스 이벤트 대응표**(5.6)
-- **참조 호스트 앱**과 Mallang-Bench 요청·공격 세트
-- 용어팩의 다른 언어·분야 팩
+Contributions we welcome:
+- Methods and experiments for the **open problems** O1 (contract sufficiency), O3 (feature interaction) and O7 (privacy-preserving promotion)
+- **Harness event mapping tables** (5.6) for other agent runtimes
+- A **reference host app** and Mallang-Bench request and attack sets
+- Lexicon packs for other languages and domains, proofreading of spec translations, and new language editions
 
-이슈에는 해당 장과 규칙 id(예: `3.3 L7`, `I10`)를 적어 주세요. 식별자 규칙과 빌드 검증 절차는 [CONTRIBUTING.md](CONTRIBUTING.md)에 있습니다.
+In issues, please cite the chapter and rule id (e.g. `3.3 L7`, `I10`). Identifier rules and the build verification procedure are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## 라이선스
+## License
 
-| 대상 | 라이선스 | 의미 |
+| Scope | License | Meaning |
 | --- | --- | --- |
-| `docs/`, `README.md` 등 문서 | [CC BY 4.0](LICENSE-docs) | 출처를 밝히면 복제·번역·수정·상업적 이용 가능 |
-| `schemas/`, `examples/`, `tools/` | [Apache-2.0](LICENSE) | 제품 코드에 그대로 포함 가능. 특허 허여 포함 |
+| Documents such as `docs/`, `README.md` | [CC BY 4.0](LICENSE-docs) | Copying, translation, modification and commercial use allowed with attribution |
+| `schemas/`, `examples/`, `tools/` | [Apache-2.0](LICENSE) | Can be included as is in product code. Includes a patent grant |
 
-스키마를 복사해 쓸 때는 파일과 함께 출처(이 저장소, 버전)를 남겨 주세요. 조사 노트가 인용한 외부 프로젝트는 각자의 라이선스를 따릅니다.
+When you copy a schema, keep its source (this repository, version) with the file. External projects cited by the research notes follow their own licenses.
 
-## 인용
+## Citation
 
-문서·논문·설계 리뷰에서 인용할 때는 버전과 절·규칙 id를 함께 적어 주세요. 명세가 바뀌어도 근거를 추적할 수 있습니다. 기계가 읽는 형식은 [CITATION.cff](CITATION.cff)입니다.
+When citing in documents, papers or design reviews, include the version and the section or rule id. That way the grounds stay traceable even as the spec changes. The machine-readable format is [CITATION.cff](CITATION.cff).
 
 ```text
-Mallangable-AI contributors. Mallangable-AI: A Reference Architecture for AI-Driven Malleable Software. v0.2.2, 2026.
+Mallangable-AI contributors. Mallangable-AI: A Reference Architecture for AI-Driven Malleable Software. v0.2.4, 2026.
 ```
 
 ```bibtex
@@ -346,8 +349,8 @@ Mallangable-AI contributors. Mallangable-AI: A Reference Architecture for AI-Dri
   title  = {Mallangable-AI: A Reference Architecture for AI-Driven Malleable Software},
   author = {{Mallangable-AI contributors}},
   year   = {2026},
-  note   = {Version 0.2.2. Specification (Korean), JSON Schemas and tools}
+  note   = {Version 0.2.4. Specification (en, ko, zh-CN, ja, es), JSON Schemas and tools}
 }
 ```
 
-본문 인용 예: "사용자 수정의 깊이는 Mallangable-AI 2.6의 D1~D5를 따르고, D4 이상은 즉시 활성화하지 않는다(N5)."
+Example in-text citation: "The depth of user modifications follows D1~D5 of Mallangable-AI 2.6, and D4 and above are not activated immediately (N5)."

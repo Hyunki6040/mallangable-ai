@@ -1,0 +1,77 @@
+# 简体中文基本术语包 + 领域包（教育）示例（规范 8.9）
+# schema：schemas/lexicon-pack.schema.json
+pack:
+  id: mallang.core.zh-cn
+  version: "0.1.0"
+  domain: general
+locale: zh-CN
+concepts:
+  change:           { basic: 改动, practitioner: 变更, developer: change, explain: 一次改动的内容 }
+  feature:          { basic: 我做的功能, practitioner: 功能, developer: feature, explain: 为同一目的所做改动的集合 }
+  record:           { basic: 保存点, practitioner: 记录, developer: commit, explain: 随时可以回到的位置 }
+  branch:           { basic: 试验版, practitioner: 试验分支, developer: branch, explain: 不动原来的东西、用来试一试的副本 }
+  merge:            { basic: 合起来, practitioner: 合并, developer: merge, explain: 把两个版本合成一个 }
+  conflict:         { basic: 重叠的部分, practitioner: 冲突, developer: conflict, explain: 双方把同一处改得不一样 }
+  intent_conflict:  { basic: 需要选择的部分, practitioner: 意图冲突, developer: intent conflict, explain: 两者无法同时满足 }
+  revert:           { basic: 撤回, practitioner: 回退, developer: revert, explain: 回到之前的状态 }
+  baseline:         { basic: 基本版, practitioner: 基线版, developer: baseline (LTS), explain: 大家都用作起点的版本 }
+  baseline_official: { basic: 官方基本版, practitioner: 官方基线版, developer: official baseline }
+  baseline_tenant:  { basic: 公司基本版, practitioner: 租户基线版, developer: tenant baseline }
+  baseline_org:     { basic: 团队基本版, practitioner: 组织基线版, developer: org baseline }
+  release:          { basic: 新基本版, practitioner: 基线版发布, developer: release, explain: 基本版有了新版本 }
+  fork:             { basic: 我的副本, practitioner: 分叉, developer: fork, explain: 从基本版分出来的我的版本 }
+  extension_point:  { basic: 可以改的位置, practitioner: 扩展点, developer: extension point, explain: 应用允许修改的位置 }
+  capability:       { basic: 允许范围, practitioner: 权限, developer: capability, explain: 功能可以使用的数据和操作 }
+  sandbox:          { basic: 安全空间, practitioner: 隔离运行环境, developer: sandbox, explain: 先运行试试、不影响其他地方的地方 }
+  validation:       { basic: 确认, practitioner: 验证, developer: validation gates, explain: 检查是否按承诺运行 }
+  contract:         { basic: 承诺清单, practitioner: 验收条件, developer: contract, explain: 这个功能必须遵守的事项 }
+  diff:             { basic: 改了哪里, practitioner: 差异, developer: diff, explain: 前后的不同 }
+  activate:         { basic: 应用, practitioner: 激活, developer: activate, explain: 真正开启 }
+  preview:          { basic: 预览, practitioner: 预览, developer: preview }
+  safe_mode:        { basic: 以基本模式启动, practitioner: 安全模式, developer: safe mode, explain: 关闭我的所有改动后启动 }
+  quarantine:       { basic: 暂时关闭, practitioner: 隔离, developer: quarantine, explain: 停用引发问题的功能 }
+  depth:            { basic: 改动程度, practitioner: 变更深度, developer: depth D1-D5 }
+  depth_d1:         { basic: 样子, practitioner: 外观(D1), developer: D1 }
+  depth_d2:         { basic: 组合, practitioner: 组合(D2), developer: D2 }
+  depth_d3:         { basic: 界面, practitioner: 界面(D3), developer: D3 }
+  depth_d4:         { basic: 动作, practitioner: 行为(D4), developer: D4 }
+  policy_ceiling:   { basic: 公司允许的范围, practitioner: 策略上限, developer: policy ceiling }
+  canary:           { basic: 分批应用, practitioner: 逐步应用, developer: canary rollout, explain: 先对一部分应用并检查问题 }
+  drift:            { basic: 落后于基本版, practitioner: 基线版漂移, developer: drift }
+  subscribe_share:  { basic: 持续接收, practitioner: 订阅式共享, developer: subscribe share, explain: 发送者修改后我也会收到更新建议 }
+  promotion:        { basic: 采纳为正式功能, practitioner: 晋升, developer: promotion }
+  audit_log:        { basic: 活动记录, practitioner: 审计日志, developer: audit log }
+  visibility:       { basic: 管理员能看到的范围, practitioner: 管理可见性, developer: visibility V0-V3 }
+  agent:            { basic: AI 助手, practitioner: 智能体, developer: agent }
+  model:            { basic: AI 引擎, practitioner: 模型, developer: model }
+  api_key:          { basic: 连接钥匙, practitioner: API 密钥, developer: API key, explain: 使用 AI 引擎所需的秘密代码 }
+  tokens:           { basic: 用量, practitioner: token 用量, developer: tokens }
+  route_quality:    { basic: 质量模式, practitioner: 模型路由等级, developer: route tier }
+  receipt:          { basic: 回执, practitioner: 变更回执, developer: change receipt }
+  badge_user_added: { basic: 我添加的功能, practitioner: 用户扩展, developer: user extension }
+  cap_tasks_read:   { basic: 查看待办, practitioner: 待办读取权限, developer: tasks.read }
+  cap_tasks_write:  { basic: 修改待办, practitioner: 待办写入权限, developer: tasks.write }
+  cap_notify_local: { basic: 在我的屏幕上提醒, practitioner: 本地通知权限, developer: notify.local }
+  cap_net_post:     { basic: 把内容发到外部, practitioner: 对外发送权限, developer: net.*.post, caution: 信息会发送到应用之外 }
+  cap_people_read:  { basic: 查看他人信息, practitioner: 成员信息读取权限, developer: people.read, caution: 会访问其他人的信息 }
+lint:
+  basic_forbidden: [提交, 分支, 合并, 变基, 分叉, 令牌, token, API, 沙箱, diff, 部署, 回滚, 清单, 钩子, 仓库, 代码库]
+  status_words:
+    understanding: 正在理解
+    building: 正在制作
+    checking: 正在确认
+    ready: 准备好了
+---
+# 领域包：教育。扩展基本包，只覆盖部分概念。
+pack:
+  id: mallang.education.zh-cn
+  version: "0.1.0"
+  extends: mallang.core.zh-cn
+  domain: education
+locale: zh-CN
+concepts:
+  feature:         { basic: 我的上课工具, explain: 为课堂量身制作的功能 }
+  baseline_tenant: { basic: 学校基本版 }
+  baseline_org:    { basic: 年级基本版 }
+  cap_people_read: { basic: 查看学生信息, caution: 会访问学生的个人信息。请确认学校的规定 }
+  subscribe_share: { basic: 持续接收同事老师的版本 }

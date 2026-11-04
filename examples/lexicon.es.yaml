@@ -1,0 +1,77 @@
+# Ejemplo de paquete de léxico básico en español + paquete de dominio (educación) (especificación 8.9)
+# Esquema: schemas/lexicon-pack.schema.json
+pack:
+  id: mallang.core.es
+  version: "0.1.0"
+  domain: general
+locale: es
+concepts:
+  change:           { basic: lo que cambié, practitioner: cambio, developer: change, explain: lo que se cambió de una sola vez }
+  feature:          { basic: función que creé, practitioner: funcionalidad, developer: feature, explain: conjunto de cambios hechos con el mismo propósito }
+  record:           { basic: punto de guardado, practitioner: registro, developer: commit, explain: un punto al que siempre se puede volver }
+  branch:           { basic: versión de prueba, practitioner: rama experimental, developer: branch, explain: una copia para probar sin tocar el original }
+  merge:            { basic: unir, practitioner: fusión, developer: merge, explain: juntar dos versiones en una }
+  conflict:         { basic: parte que se superpone, practitioner: conflicto, developer: conflict, explain: ambos lados cambiaron el mismo lugar de forma distinta }
+  intent_conflict:  { basic: parte que necesita una elección, practitioner: conflicto de intención, developer: intent conflict, explain: no se pueden cumplir las dos cosas a la vez }
+  revert:           { basic: deshacer, practitioner: revertir, developer: revert, explain: volver al estado anterior }
+  baseline:         { basic: versión base, practitioner: línea base, developer: baseline (LTS), explain: la versión que todos usan como punto de partida }
+  baseline_official: { basic: versión base oficial, practitioner: línea base oficial, developer: official baseline }
+  baseline_tenant:  { basic: versión base de la empresa, practitioner: línea base del inquilino, developer: tenant baseline }
+  baseline_org:     { basic: versión base del equipo, practitioner: línea base de la organización, developer: org baseline }
+  release:          { basic: nueva versión base, practitioner: versión de la línea base, developer: release, explain: salió una nueva versión base }
+  fork:             { basic: mi copia, practitioner: fork, developer: fork, explain: "mi versión, separada de la versión base" }
+  extension_point:  { basic: lugar que se puede cambiar, practitioner: punto de extensión, developer: extension point, explain: un lugar donde la aplicación permite modificaciones }
+  capability:       { basic: lo permitido, practitioner: permiso, developer: capability, explain: los datos y acciones que puede usar una función }
+  sandbox:          { basic: espacio seguro, practitioner: entorno de ejecución aislado, developer: sandbox, explain: un lugar para probar primero sin afectar a nada más }
+  validation:       { basic: comprobación, practitioner: verificación, developer: validation gates, explain: revisar que funciona según lo prometido }
+  contract:         { basic: lista de promesas, practitioner: condiciones de aceptación, developer: contract, explain: lo que esta función debe cumplir siempre }
+  diff:             { basic: qué cambió, practitioner: diferencias, developer: diff, explain: la diferencia entre antes y después }
+  activate:         { basic: aplicar, practitioner: activación, developer: activate, explain: encenderlo de verdad }
+  preview:          { basic: vista previa, practitioner: vista previa, developer: preview }
+  safe_mode:        { basic: iniciar en modo básico, practitioner: modo seguro, developer: safe mode, explain: iniciar con todos mis cambios apagados }
+  quarantine:       { basic: apagado por ahora, practitioner: cuarentena, developer: quarantine, explain: detener la función que causó el problema }
+  depth:            { basic: cuánto se cambia, practitioner: profundidad del cambio, developer: depth D1-D5 }
+  depth_d1:         { basic: aspecto, practitioner: apariencia (D1), developer: D1 }
+  depth_d2:         { basic: combinación, practitioner: composición (D2), developer: D2 }
+  depth_d3:         { basic: pantalla, practitioner: pantalla (D3), developer: D3 }
+  depth_d4:         { basic: comportamiento, practitioner: comportamiento (D4), developer: D4 }
+  policy_ceiling:   { basic: lo que permite la empresa, practitioner: techo de política, developer: policy ceiling }
+  canary:           { basic: aplicar por turnos, practitioner: aplicación gradual, developer: canary rollout, explain: aplicar primero a una parte y comprobar si hay problemas }
+  drift:            { basic: atrasado respecto a la versión base, practitioner: deriva de la línea base, developer: drift }
+  subscribe_share:  { basic: seguir recibiendo, practitioner: compartir por suscripción, developer: subscribe share, explain: "si quien lo envió lo corrige, yo también recibo una propuesta de actualización" }
+  promotion:        { basic: adoptado como función oficial, practitioner: promoción, developer: promotion }
+  audit_log:        { basic: historial de actividad, practitioner: registro de auditoría, developer: audit log }
+  visibility:       { basic: lo que ve el administrador, practitioner: visibilidad para la administración, developer: visibility V0-V3 }
+  agent:            { basic: asistente de IA, practitioner: agente, developer: agent }
+  model:            { basic: motor de IA, practitioner: modelo, developer: model }
+  api_key:          { basic: llave de conexión, practitioner: clave de API, developer: API key, explain: un código secreto para usar el motor de IA }
+  tokens:           { basic: uso, practitioner: uso de tokens, developer: tokens }
+  route_quality:    { basic: modo de calidad, practitioner: nivel de enrutamiento de modelos, developer: route tier }
+  receipt:          { basic: recibo, practitioner: recibo de cambio, developer: change receipt }
+  badge_user_added: { basic: función que añadí, practitioner: extensión de usuario, developer: user extension }
+  cap_tasks_read:   { basic: ver tareas, practitioner: permiso de lectura de tareas, developer: tasks.read }
+  cap_tasks_write:  { basic: cambiar tareas, practitioner: permiso de escritura de tareas, developer: tasks.write }
+  cap_notify_local: { basic: avisos en mi pantalla, practitioner: permiso de notificación local, developer: notify.local }
+  cap_net_post:     { basic: enviar contenido hacia fuera, practitioner: permiso de envío externo, developer: net.*.post, caution: la información sale de la aplicación }
+  cap_people_read:  { basic: ver información de otras personas, practitioner: permiso de lectura de información de miembros, developer: people.read, caution: accede a información de otras personas }
+lint:
+  basic_forbidden: [commit, branch, rama, merge, fusión, rebase, fork, token, API, sandbox, diff, despliegue, rollback, manifiesto, hook, repositorio]
+  status_words:
+    understanding: entendiendo
+    building: creando
+    checking: comprobando
+    ready: listo
+---
+# Paquete de dominio: educación. Extiende el paquete básico y sobrescribe solo algunos conceptos.
+pack:
+  id: mallang.education.es
+  version: "0.1.0"
+  extends: mallang.core.es
+  domain: education
+locale: es
+concepts:
+  feature:         { basic: mi herramienta de clase, explain: una función hecha a la medida de la clase }
+  baseline_tenant: { basic: versión base de la escuela }
+  baseline_org:    { basic: versión base del curso }
+  cap_people_read: { basic: ver información de los estudiantes, caution: accede a datos personales de los estudiantes. Consulta las normas de la escuela }
+  subscribe_share: { basic: seguir recibiendo lo de un colega docente }

@@ -14,11 +14,11 @@ for p in sorted((R / "schemas").glob("*.json")):
     s = json.loads(p.read_text())
     Draft202012Validator.check_schema(s)
     V[p.name.split(".")[0]] = Draft202012Validator(s, format_checker=FormatChecker())
-MAX_BYTES, MAX_MSG = 1 << 20, 300  # 설계 제안값: 외부 문서 1 MiB, 오류 한 줄 300자
-safe = lambda s: repr(str(s))[1:-1][:MAX_MSG]  # 제어 문자·개행 이스케이프 (터미널·CI 주석 주입 방지)
+MAX_BYTES, MAX_MSG = 1 << 20, 300  # design proposal value: external document 1 MiB, 300 characters per error line
+safe = lambda s: repr(str(s))[1:-1][:MAX_MSG]  # escape control characters and newlines (prevents terminal and CI annotation injection)
 assert safe("a\x1b[2K\r\n::error::") == "a\\x1b[2K\\r\\n::error::"
 
-class NoAliasLoader(yaml.SafeLoader):  # ponytail: 별칭 전면 거부. 명세 문서는 앵커가 필요 없다 (alias bomb 방지)
+class NoAliasLoader(yaml.SafeLoader):  # ponytail: reject all aliases. Spec documents need no anchors (prevents alias bombs)
     def compose_node(self, parent, index):
         if self.check_event(yaml.AliasEvent):
             raise yaml.YAMLError("YAML alias(*ref) is not allowed")
@@ -41,17 +41,19 @@ if len(sys.argv) > 1:  # validate the caller's own documents, skip the self-test
             try:
                 errs = sorted(V[sc].iter_errors(d), key=lambda e: str(e.json_path))
                 lines = [f"{safe(e.json_path)}: {safe(e.message)}" for e in errs[:5]]
-            except Exception as e:  # 비문자열 키 등: 이 문서만 실패로 보고하고 다음 파일을 계속 본다
+            except Exception as e:  # non-string keys etc.: report only this document as failed and continue with the next file
                 errs, lines = [e], [f"validator error: {safe(type(e).__name__)}: {safe(e)}"]
             print(f"{'OK  ' if not errs else 'FAIL'} {safe(f)}[{i}]", *lines, sep="\n  ")
             bad += bool(errs)
     sys.exit(1 if bad else 0)
 load = lambda n: list(yaml.safe_load_all((R / "examples" / n).read_text(encoding="utf-8")))
 EX = {"capability-map": "capability-map.example.yaml", "change-record": "change.example.yaml",
-      "extension-manifest": "extension-manifest.example.yaml", "lexicon-pack": "lexicon.ko.yaml",
-      "policy": "policy.example.yaml"}
-fail = 0
-for sc, f in EX.items():
+      "extension-manifest": "extension-manifest.example.yaml", "policy": "policy.example.yaml"}
+LEX = sorted(p.name for p in (R / "examples").glob("lexicon.*.yaml"))  # every language pack, more may appear
+fail = 0 if LEX else 1
+if not LEX:
+    print("FAIL example lexicon.*.yaml: no lexicon pack found")
+for sc, f in [*EX.items(), *(("lexicon-pack", f) for f in LEX)]:
     for i, d in enumerate(load(f)):
         errs = [e.message for e in V[sc].iter_errors(d)]
         print(f"{'OK  ' if not errs else 'FAIL'} example {f}[{i}]", *errs[:3], sep="\n  " if errs else "")
@@ -84,7 +86,7 @@ CASES = [
      mk(C[0], set_(("provenance", "judge_instance"), C[0]["provenance"]["generator_instance"])), False),
     ("G4 pass but no judge_instance (I7)", "change-record", mk(C[0], pop(("provenance", "judge_instance"))), True),
     ("contract = single judge item, deterministic defaulted (2.5)", "change-record",
-     mk(C[0], set_(("contract",), [{"id": "looks-ok", "check": "judge", "expect": "보기 좋다"}])), True),
+     mk(C[0], set_(("contract",), [{"id": "looks-ok", "check": "judge", "expect": "looks good"}])), True),
     ("D5 record with only G0 (5.8)", "change-record",
      mk(C[0], both(set_(("depth",), "D5"), set_(("validation", "gates"), {"G0": "pass"}))), True),
     ("points with invalid id", "change-record", mk(C[0], set_(("points",), ["NOT A POINT!!"])), True),
@@ -98,7 +100,7 @@ CASES = [
     ("network allow '*' with no egress capability", "extension-manifest",
      mk(M, both(set_(("network",), {"allow": ["*"]}), set_(("permissions",), []))), True),
     ("contract = prose-only deterministic item, no executable form (2.5)", "change-record",
-     mk(C[0], set_(("contract",), [{"id": "prose", "check": "tree-query", "expect": "목록 2건"}])), True),
+     mk(C[0], set_(("contract",), [{"id": "prose", "check": "tree-query", "expect": "2 items in the list"}])), True),
     ("network allow IP literal 169.254.169.254 (7.11)", "extension-manifest",
      mk(M, set_(("network",), {"allow": ["169.254.169.254"]})), True),
     ("network allow host but permissions lack egress capability (I4, cross-document)", "extension-manifest",

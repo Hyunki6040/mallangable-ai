@@ -1,0 +1,77 @@
+# 日本語の基本用語パック + 分野パック(教育)の例 (仕様 8.9)
+# スキーマ: schemas/lexicon-pack.schema.json
+pack:
+  id: mallang.core.ja
+  version: "0.1.0"
+  domain: general
+locale: ja
+concepts:
+  change:           { basic: 変えたもの, practitioner: 変更, developer: change, explain: 一度に変えた内容 }
+  feature:          { basic: 自分で作った機能, practitioner: 機能, developer: feature, explain: 同じ目的で変えたもののまとまり }
+  record:           { basic: 保存ポイント, practitioner: 記録, developer: commit, explain: いつでも戻ってこられるポイント }
+  branch:           { basic: お試し版, practitioner: 実験ブランチ, developer: branch, explain: 元のものに触れずに試してみるコピー }
+  merge:            { basic: まとめる, practitioner: マージ, developer: merge, explain: 2つのバージョンを1つにまとめる }
+  conflict:         { basic: 重なっている部分, practitioner: 衝突, developer: conflict, explain: 両方が同じ場所を違うように変えた }
+  intent_conflict:  { basic: 選択が必要な部分, practitioner: 意図の衝突, developer: intent conflict, explain: 2つを同時には満たせない }
+  revert:           { basic: 元に戻す, practitioner: 取り消し, developer: revert, explain: 前の状態に戻る }
+  baseline:         { basic: 基本版, practitioner: ベースライン, developer: baseline (LTS), explain: みんなが出発点として使うバージョン }
+  baseline_official: { basic: 公式の基本版, practitioner: 公式ベースライン, developer: official baseline }
+  baseline_tenant:  { basic: 会社の基本版, practitioner: テナントベースライン, developer: tenant baseline }
+  baseline_org:     { basic: チームの基本版, practitioner: 組織ベースライン, developer: org baseline }
+  release:          { basic: 新しい基本版, practitioner: ベースラインのリリース, developer: release, explain: 基本版が新しく出た }
+  fork:             { basic: 自分のコピー, practitioner: フォーク, developer: fork, explain: 基本版から分かれた自分のバージョン }
+  extension_point:  { basic: 変えられる場所, practitioner: 拡張ポイント, developer: extension point, explain: アプリが修正を許可した位置 }
+  capability:       { basic: 許可範囲, practitioner: 権限, developer: capability, explain: 機能が使えるデータと動作 }
+  sandbox:          { basic: 安全な場所, practitioner: 隔離された実行環境, developer: sandbox, explain: ほかに影響を与えずに先に動かしてみる場所 }
+  validation:       { basic: 確認, practitioner: 検証, developer: validation gates, explain: 約束どおりに動くかをチェック }
+  contract:         { basic: 約束リスト, practitioner: 受け入れ条件, developer: contract, explain: この機能が必ず守らなければならないこと }
+  diff:             { basic: 変わった点, practitioner: 差分, developer: diff, explain: 前と後の違い }
+  activate:         { basic: 適用, practitioner: 有効化, developer: activate, explain: 実際にオンにする }
+  preview:          { basic: プレビュー, practitioner: プレビュー, developer: preview }
+  safe_mode:        { basic: 基本モードで起動, practitioner: セーフモード, developer: safe mode, explain: 自分の変更をすべてオフにして起動 }
+  quarantine:       { basic: しばらくオフ, practitioner: 隔離, developer: quarantine, explain: 問題を起こした機能を止める }
+  depth:            { basic: 変える度合い, practitioner: 変更の深さ, developer: depth D1-D5 }
+  depth_d1:         { basic: 見た目, practitioner: 外観(D1), developer: D1 }
+  depth_d2:         { basic: 組み合わせ, practitioner: 組み合わせ(D2), developer: D2 }
+  depth_d3:         { basic: 画面, practitioner: 画面(D3), developer: D3 }
+  depth_d4:         { basic: 動き, practitioner: 動作(D4), developer: D4 }
+  policy_ceiling:   { basic: 会社が許可した範囲, practitioner: ポリシー上限, developer: policy ceiling }
+  canary:           { basic: 順番に適用, practitioner: 段階的な適用, developer: canary rollout, explain: 一部から適用して問題がないか確認する }
+  drift:            { basic: 基本版より遅れている, practitioner: ベースラインのドリフト, developer: drift }
+  subscribe_share:  { basic: 続けて受け取る, practitioner: 購読型の共有, developer: subscribe share, explain: 送った人が直すと自分にも更新の提案が届く }
+  promotion:        { basic: 公式機能として採用, practitioner: 昇格, developer: promotion }
+  audit_log:        { basic: 活動の記録, practitioner: 監査ログ, developer: audit log }
+  visibility:       { basic: 管理者に見える範囲, practitioner: 管理上の可視性, developer: visibility V0-V3 }
+  agent:            { basic: AIアシスタント, practitioner: エージェント, developer: agent }
+  model:            { basic: AIエンジン, practitioner: モデル, developer: model }
+  api_key:          { basic: 接続キー, practitioner: API キー, developer: API key, explain: AIエンジンを使うための秘密のコード }
+  tokens:           { basic: 使用量, practitioner: トークン使用量, developer: tokens }
+  route_quality:    { basic: 品質モード, practitioner: モデルルーティングの等級, developer: route tier }
+  receipt:          { basic: レシート, practitioner: 変更レシート, developer: change receipt }
+  badge_user_added: { basic: 自分で追加した機能, practitioner: ユーザー拡張, developer: user extension }
+  cap_tasks_read:   { basic: タスクを見る, practitioner: タスクの読み取り権限, developer: tasks.read }
+  cap_tasks_write:  { basic: タスクを変える, practitioner: タスクの書き込み権限, developer: tasks.write }
+  cap_notify_local: { basic: 自分の画面に通知, practitioner: ローカル通知の権限, developer: notify.local }
+  cap_net_post:     { basic: 外部へ内容を送る, practitioner: 外部送信の権限, developer: net.*.post, caution: アプリの外へ情報が出ていきます }
+  cap_people_read:  { basic: ほかの人の情報を見る, practitioner: メンバー情報の読み取り権限, developer: people.read, caution: ほかの人の情報にアクセスします }
+lint:
+  basic_forbidden: [コミット, ブランチ, マージ, リベース, フォーク, トークン, API, サンドボックス, ディフ, 差分, デプロイ, ロールバック, マニフェスト, フック, リポジトリ]
+  status_words:
+    understanding: 理解しています
+    building: 作っています
+    checking: 確認しています
+    ready: 準備できました
+---
+# 分野パック: 教育。基本パックを拡張し、一部の概念だけを上書きする。
+pack:
+  id: mallang.education.ja
+  version: "0.1.0"
+  extends: mallang.core.ja
+  domain: education
+locale: ja
+concepts:
+  feature:         { basic: 自分の授業ツール, explain: 授業に合わせて作った機能 }
+  baseline_tenant: { basic: 学校の基本版 }
+  baseline_org:    { basic: 学年の基本版 }
+  cap_people_read: { basic: 生徒の情報を見る, caution: 生徒の個人情報にアクセスします。学校の規定を確認してください }
+  subscribe_share: { basic: 同僚の先生のものを続けて受け取る }

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mallangable.ai/schemas/v0.1/capability-map.schema.json",
-  "title": "Mallangable 기능 지도 (Capability Map)",
-  "description": "호스트가 노출하는 확장 지점·기능 권한·상태 스키마의 기계 판독 목록. 에이전트 컨텍스트로 공급된다 (명세 2.2, 5.10).",
+  "title": "Mallangable Capability Map",
+  "description": "Machine-readable list of the extension points, capabilities and state schemas a host exposes. Supplied to the agent as context (spec 2.2, 5.10).",
   "type": "object",
   "required": ["host", "map_version", "extension_points", "capabilities"],
   "additionalProperties": false,
@@ -13,10 +13,10 @@
       "additionalProperties": false,
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
-        "version": { "type": "string", "description": "호스트(코어) 버전" }
+        "version": { "type": "string", "description": "Host (core) version" }
       }
     },
-    "map_version": { "type": "string", "description": "기능 지도 자체의 semver" },
+    "map_version": { "type": "string", "description": "semver of the capability map itself" },
     "extension_points": {
       "type": "array",
       "items": { "$ref": "#/$defs/extensionPoint" }
@@ -28,12 +28,12 @@
     "catalog_id": {
       "type": "string",
       "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:\\S+$",
-      "description": "D3 카탈로그 식별자. URI 형식 문자열이며 내려받을 수 있을 필요는 없다. 카탈로그 내용이 바뀌면 값도 바뀐다 (A2UI catalogId와 같은 의미)",
+      "description": "D3 catalog identifier. A URI-formatted string that need not be downloadable. The value changes whenever the catalog contents change (same meaning as A2UI catalogId)",
       "examples": ["https://todo.example/catalogs/v3"]
     },
     "catalog": {
       "type": "array",
-      "description": "D3 선언형 UI에서 쓸 수 있는 승인된 컴포넌트 목록",
+      "description": "List of approved components usable in D3 declarative UI",
       "items": {
         "type": "object",
         "required": ["component"],
@@ -41,7 +41,7 @@
         "properties": {
           "component": { "type": "string" },
           "props_schema": { "type": "object" },
-          "a11y": { "type": "string", "description": "접근성 요구 사항 요약" }
+          "a11y": { "type": "string", "description": "Summary of accessibility requirements" }
         }
       }
     }
@@ -65,7 +65,7 @@
         "output_schema": { "type": "object" },
         "merge": {
           "type": "object",
-          "description": "이 지점의 선언형 산출물을 레이어끼리 합치는 규칙 (명세 2.3, 6.6 R2). 키는 산출물 안의 JSON Pointer(RFC 6901, 빈 문자열은 문서 전체). 값 이름은 Kubernetes Server-Side Apply의 x-kubernetes-list-type을 따른다. 선언이 없는 배열은 atomic",
+          "description": "Rules for merging this point's declarative artifacts across layers (spec 2.3, 6.6 R2). Keys are JSON Pointers into the artifact (RFC 6901; the empty string is the whole document). Value names follow x-kubernetes-list-type from Kubernetes Server-Side Apply. Arrays without a declaration are atomic",
           "propertyNames": { "pattern": "^(/([^~/]|~[01])*)*$" },
           "additionalProperties": { "$ref": "#/$defs/mergeRule" }
         },
@@ -77,8 +77,8 @@
       "required": ["strategy"],
       "additionalProperties": false,
       "properties": {
-        "strategy": { "type": "string", "enum": ["atomic", "set", "map"], "description": "atomic=통째로 교체, set=값 합집합, map=keys로 항목을 식별해 항목별 병합" },
-        "keys": { "type": "array", "items": { "type": "string", "pattern": "\\S" }, "minItems": 1, "uniqueItems": true, "description": "strategy=map일 때 항목을 식별하는 필드 이름" }
+        "strategy": { "type": "string", "enum": ["atomic", "set", "map"], "description": "atomic=replace as a whole, set=union of values, map=identify items by keys and merge item by item" },
+        "keys": { "type": "array", "items": { "type": "string", "pattern": "\\S" }, "minItems": 1, "uniqueItems": true, "description": "Field names that identify items when strategy=map" }
       },
       "if": { "properties": { "strategy": { "const": "map" } } },
       "then": { "required": ["keys"] },
@@ -90,9 +90,9 @@
       "additionalProperties": false,
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9_*]+)+$", "examples": ["tasks.read", "net.slack.post"] },
-        "risk": { "type": "string", "enum": ["read", "write", "egress", "sensitive"], "description": "egress=외부 전송, sensitive=타인·민감 데이터. 기능을 MCP 도구로 노출할 때 read는 readOnlyHint=true, egress는 openWorldHint=true로 내보낸다. 받은 쪽의 MCP annotations는 신뢰하지 않으며 이 값이 권위 있다 (I8)" },
-        "destructive": { "type": "boolean", "default": false, "description": "되돌릴 수 없는 쓰기. MCP destructiveHint와 같은 의미. true면 활성화 정책과 무관하게 G5" },
-        "lexicon_id": { "type": "string", "description": "사용자 화면 표현을 찾을 용어팩 개념 id" },
+        "risk": { "type": "string", "enum": ["read", "write", "egress", "sensitive"], "description": "egress=external transmission, sensitive=other people's or sensitive data. When a capability is exposed as an MCP tool, read is exported as readOnlyHint=true and egress as openWorldHint=true. Received MCP annotations are not trusted; this value is authoritative (I8)" },
+        "destructive": { "type": "boolean", "default": false, "description": "Irreversible write. Same meaning as MCP destructiveHint. If true, G5 applies regardless of activation policy" },
+        "lexicon_id": { "type": "string", "description": "Lexicon pack concept id used to look up the user-facing wording" },
         "description": { "type": "string" }
       },
       "if": { "properties": { "risk": { "const": "read" } } },

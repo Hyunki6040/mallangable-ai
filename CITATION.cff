@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "이 명세를 인용할 때는 아래 정보를 쓰고, 근거가 된 절·규칙 id(예: 3.3 L1, I7)를 함께 적어 주세요."
+message: "If you cite this specification, please use the information below and also give the section and rule ids you rely on (e.g. 3.3 L1, I7)."
 type: software
 title: "Mallangable-AI: A Reference Architecture for AI-Driven Malleable Software"
 abstract: >-
@@ -7,11 +7,11 @@ abstract: >-
   formal model with ten invariants, five-level change-depth hierarchy, an eleven-axis
   design space with a calculator, interval-delegation control with user floor rights,
   a six-plane reference architecture, contract-preserving merges, and a business-model
-  coupling matrix. Korean-language specification with JSON Schemas and tools.
+  coupling matrix. Specification in English (default), Korean (original), Simplified Chinese, Japanese and Spanish, with JSON Schemas and tools.
 authors:
   - name: "Mallangable-AI contributors"
-version: "0.2.2"
-date-released: "2026-11-04"
+version: "0.2.4"
+date-released: "2026-11-05"
 license:
   - CC-BY-4.0
   - Apache-2.0

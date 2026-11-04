@@ -1,160 +1,174 @@
-# 변경 기록
+<!-- LANG-BAR -->
+**English** · [한국어](CHANGELOG.ko.md) · [简体中文](CHANGELOG.zh-CN.md) · [日本語](CHANGELOG.ja.md) · [Español](CHANGELOG.es.md)
+<!-- /LANG-BAR -->
+
+# Changelog
+
+## v0.2.4 — 2026-11-05
+
+Multilingual editions. The spec content, design-space numbers and schema contracts did not change.
+
+* The default README is now English, and the language editions are split out: English (`README.md`) · Korean (`README.ko.md`, original) · Simplified Chinese (`README.zh-CN.md`) · Japanese (`README.ja.md`) · Spanish (`README.es.md`). CHANGELOG and CONTRIBUTING follow the same pattern.
+
+* The spec chapters and research notes moved to `docs/<language>/` and are written in five languages (`docs/en`, `docs/ko`, `docs/zh-CN`, `docs/ja`, `docs/es`). The Korean edition is the original; where a translation differs, the original prevails.
+
+* Schema descriptions, example documents and tool messages and help text are now in English. The lexicon pack example exists per language (`examples/lexicon.{en,ko,zh-CN,ja,es}.yaml`). `check_schemas.py` validates all of them.
 
 ## v0.2.3 — 2026-11-05
 
-Cloudflare security-audit 스킬로 저장소 전체를 적대적 보안 검토했습니다(quick 프로파일, `docs/research/security-audit-2026-11-05.md`). 설계 공간 수치는 바뀌지 않았습니다.
+Adversarial security review of the whole repository with the Cloudflare security-audit skill (quick profile, `docs/en/research/security-audit-2026-11-05.md`). Design-space numbers did not change.
 
-### 통제·참조 아키텍처 (4·5장)
+### Control and reference architecture (chapters 4 and 5)
 
-* PDP `decide()`의 하한 행동 예외를 `floor_scoped(req)`로 좁혔습니다. 사람 소유자 · 자기 레이어 · 이전 상태 · 권한·깊이 비증가일 때만 하한이고, 그 밖의 되돌리기(에이전트가 부른 것, 되살리기, "다시 켜기", 보류 해제)는 활성화와 같은 판정을 거칩니다. 파괴적 기능 분기(G5)도 넣었습니다(4.8, 5.5).
+* The floor-action exception in the PDP's `decide()` is narrowed to `floor_scoped(req)`. It is a floor only when the owner is a human, the layer is their own, the target is a previous state, and neither permissions nor depth increase; any other revert (one called by an agent, redo, "turn back on", releasing a hold) goes through the same decision as activation. A destructive-feature branch (G5) was also added (4.8, 5.5).
 
-### 버전·신뢰 (6·7장)
+### Versioning and trust (chapters 6 and 7)
 
-* 기준판 전파의 자동 적용은 `activate()`(E10)를 거치고, 승인 필요면 제안으로 내려갑니다. `delta_permissions`는 자기 신고가 아니라 다시 계산합니다(6.5).
+* Automatic application during baseline propagation goes through `activate()` (E10), and drops to a proposal when approval is required. `delta_permissions` is recomputed rather than self-reported (6.5).
 
-* 보안 체크리스트에 하한 예외 범위, 전파 자동 적용, 권한 변화 재계산, egress 선언, 도구 출력 이스케이프 항목을 더했습니다(7.11).
+* The security checklist gained items for floor-exception scope, automatic propagation application, permission-change recomputation, egress declarations and tool-output escaping (7.11).
 
-### 스키마 계약
+### Schema contracts
 
-* `change-record`: 결정적 계약 중 하나 이상은 실행 가능한 형태여야 합니다. 서술형만 있는 기록은 거부합니다.
+* `change-record`: at least one deterministic contract item must be in executable form. Records with only descriptive items are rejected.
 
-* `extension-manifest`·`policy`: `network.allow`·`allowlist`가 IP 리터럴을 거부합니다. 공개 접미사 와일드카드, egress 권한 존재, `setKnob` default ⊆ ceiling은 준수 검사기 MUST로 명시하고 회귀 사례(`False` 기대)를 추가했습니다.
+* `extension-manifest` and `policy`: `network.allow` and `allowlist` reject IP literals. Public-suffix wildcards, existence of an egress permission, and `setKnob` default ⊆ ceiling are stated as conformance validator MUSTs, with regression cases added (expecting `False`).
 
-### 도구·CI
+### Tools and CI
 
-* `check_schemas.py`: 출력 제어 문자 이스케이프, YAML 별칭·1 MiB 초과 거부, 문서별 예외 격리.
+* `check_schemas.py`: escapes control characters in output, rejects YAML aliases and files over 1 MiB, isolates exceptions per document.
 
-* `design_space.py`: `--profile`·`--check`가 `normative`·`logical`·입력 오류에서 종료 코드 1, 중복 키·비객체 JSON 거부.
+* `design_space.py`: `--profile` and `--check` exit with code 1 on `normative`, `logical` or input errors, and reject duplicate keys and non-object JSON.
 
-* CI 토큰을 `contents: read`로 제한했습니다.
+* The CI token is restricted to `contents: read`.
 
 ## v0.2.2 — 2026-11-04
 
-오픈소스 공개 준비. 명세 본문·설계 공간 수치·스키마는 바뀌지 않았습니다.
+Preparation for the open-source release. The spec chapters, design-space numbers and schemas did not change.
 
-* 라이선스 확정: 문서 CC BY 4.0(`LICENSE-docs`), 스키마·예시·도구 Apache-2.0(`LICENSE`).
+* Licenses finalized: documents CC BY 4.0 (`LICENSE-docs`), schemas, examples and tools Apache-2.0 (`LICENSE`).
 
-* `CITATION.cff`, `CONTRIBUTING.md`, `requirements.txt`를 추가했습니다.
+* Added `CITATION.cff`, `CONTRIBUTING.md` and `requirements.txt`.
 
-* 도구가 다른 프로젝트의 파일을 받습니다. `design_space.py --profile FILE.json`, `check_schemas.py <schema> FILE...`.
+* The tools accept files from other projects: `design_space.py --profile FILE.json`, `check_schemas.py <schema> FILE...`.
 
-* README에 "내 프로젝트에 적용하기"(어휘 → 설계 공간 → 계산기 확장 → 데이터 계약 → 아키텍처 → 준수 주장 6단계)와 인용 형식을 추가했습니다.
+* Added "Applying it to your project" to the README (six steps: vocabulary → design space → extending the calculator → data contracts → architecture → conformance claim) and a citation format.
 
-* GitHub 공개 저장소로 공개했습니다(https://github.com/Hyunki6040/mallangable-ai). README 앞부분을 문제의식(세 가지 결핍) → 핵심 아이디어 6개 → 동작 방식 → 변경 예시 순서로 다시 썼고, 모든 push·PR에서 스키마 회귀 검사와 P1~P7 검사가 도는 CI를 추가했습니다.
+* Published as a public GitHub repository (https://github.com/Hyunki6040/mallangable-ai). The opening of the README was rewritten in the order problem statement (three gaps) → six core ideas → how it works → change example, and CI was added that runs the schema regression checks and the P1~P7 checks on every push and PR.
 
 ## v0.2.1 — 2026-11-03
 
-ThinkRail(JetBrains/thinkrail, Apache-2.0) 명세 문서를 조사해 반영했습니다(`docs/research/thinkrail-analysis.md`). 설계 공간 수치와 스키마는 바뀌지 않았습니다.
+Surveyed and incorporated the ThinkRail (JetBrains/thinkrail, Apache-2.0) specification documents (`docs/en/research/thinkrail-analysis.md`). Design-space numbers and schemas did not change.
 
-### 통제·참조 아키텍처 (4·5장)
+### Control and reference architecture (chapters 4 and 5)
 
-* 승인에 범위(이번만 · 이 작업 동안 · 항상)를 두고, "항상"은 기능 content\_hash와 권한 목록에 묶습니다. 긍정 답이 아니면 거부입니다(4.8).
+* Approvals have a scope (this time only · for this task · always), and "always" is bound to the feature's content\_hash and permission list. Anything other than an affirmative answer is a denial (4.8).
 
-* 되돌리기는 사용자가 본 상태 id를 근거로 합니다. 상태가 다르면 아무것도 바꾸지 않고, 되살리기는 같은 연산입니다(5.5).
+* Revert is based on the state id the user saw. If the state differs, nothing changes; redo is the same operation (5.5).
 
-* 판정 출력 처리 규칙을 추가했습니다. 형식이 틀리면 실패, 기록은 하네스가 새로 만듦, 지적 없는 실패는 거부, 열린 지적이 있으면 통과를 확정하지 않음, 재시도 상한은 모든 진입점이 공유합니다(5.8).
+* Added rules for handling judge output. Malformed output fails, the record is rebuilt by the harness, a failure with no findings is rejected, a pass is not finalized while findings are open, and the retry cap is shared by all entry points (5.8).
 
-* 완료 신호는 E11 하나이고 승인대기는 수준 신호입니다. 대응표 항목마다 확인한 동작·재확인 조건·제거 조건을 적습니다(5.6).
+* E11 is the only completion signal, and awaiting-approval is a level signal. Each mapping-table entry records the behavior verified, the re-verification condition and the removal condition (5.6).
 
-* 감시자의 격리 단위는 기능 전체입니다(5.9).
+* The watchdog's isolation unit is the whole feature (5.9).
 
-### 버전·신뢰·경험 (6\~8장)
+### Versioning, trust and experience (chapters 6\~8)
 
-* 동시 생성 작업은 작업 사본을 따로 두고 바꾼 경로만 기록합니다(6.4).
+* Concurrent generation jobs each get their own working copy and record only the paths they changed (6.4).
 
-* 병합 입력 읽기 실패를 부재(`null`, 곧 삭제)로 취급하지 않습니다(6.5).
+* A read failure on a merge input is not treated as absence (`null`, i.e. deletion) (6.5).
 
-* 공유 수락은 그 시점 내용에만 해당하고, 받은 기능은 내 명령·단축키 이름을 가로채지 못합니다(6.9).
+* Accepting a share applies only to the content at that moment, and received features cannot hijack my command or shortcut names (6.9).
 
-* 목록·미리보기·권한 표시는 확장 코드를 실행하지 않습니다(7.11).
+* Lists, previews and permission displays do not execute extension code (7.11).
 
-* 용어팩: 저장 데이터에는 `개념 id + 인자`만 넣고, 공유 기능은 용어팩을 바꿀 수 없으며, 문자열 단위 대체 순서를 정했습니다(8.9).
+* Lexicon packs: stored data holds only `concept id + args`, shared features cannot change the lexicon pack, and the order of string-level substitution is defined (8.9).
 
 ## v0.2 — 2026-10-30
 
-조사 세 건(`docs/research/`)을 반영했습니다. Harness² 분석, 선행 사례 조사(MCP·AG-UI·OTel·Cedar·RFC 7396 등), 적대적 평가입니다.
+Incorporated three studies (`docs/en/research/`): the Harness² analysis, the prior-art survey (MCP, AG-UI, OTel, Cedar, RFC 7396 and others) and the adversarial review.
 
-### 설계 공간 (3장, `tools/design_space.py`) — 수치가 바뀜
+### Design space (chapter 3, `tools/design_space.py`) — numbers changed
 
-* 2.6의 깊이 정의를 규칙으로 강제합니다. L3는 `A1∈{D1,D2,D3} ⇒ decl`, L4는 `D4 ⇒ sandboxed`입니다.
+* The depth definitions of 2.6 are enforced as rules. L3 is `A1∈{D1,D2,D3} ⇒ decl`, L4 is `D4 ⇒ sandboxed`.
 
-* N6 신설: D5는 공유하지 않으며 snapshot 토폴로지를 쓸 수 없습니다(I1).
+* New N6: D5 is not shared and cannot use the snapshot topology (I1).
 
-* 권장 조합 70,516개 → **36,772개**, 구조 패밀리 1,618개 → **863개**, 사업 선택지 58% → **57%**. BM 결합 행렬 7×20은 바뀌지 않았습니다.
+* Recommended combinations 70,516 → **36,772**, structural families 1,618 → **863**, business options 58% → **57%**. The 7×20 BM coupling matrix did not change.
 
-* P1·P6는 D4로, P2·P5·P7은 선언형 D3으로 바꿨습니다. 일곱 프로파일 모두 계속 clean입니다.
+* P1 and P6 moved to D4, and P2, P5 and P7 to declarative D3. All seven profiles remain clean.
 
-* 규칙 통계에 순서와 무관한 독립 위반 수와 유일 위반 수를 추가했습니다. "L1이 가장 많이 거른다"는 주장은 철회했습니다.
+* Rule statistics now include order-independent independent violation counts and unique violation counts. The claim "L1 filters the most" was withdrawn.
 
-* 잘못된 입력을 거부합니다. 없는 프로파일, JSON 오류, 알 수 없는 축이 대상입니다.
+* Invalid input is rejected: nonexistent profiles, JSON errors and unknown axes.
 
-### 핵심 모델·통제 (2·4장)
+### Core model and control (chapters 2 and 4)
 
-* 레이어 합성 `⊕`를 RFC 7396 JSON Merge Patch로 정의했습니다. 3-way 병합과의 관계도 명시했습니다.
+* Layer composition `⊕` is defined as RFC 7396 JSON Merge Patch. Its relation to 3-way merge is stated as well.
 
-* 보류 → 활성으로 넘어갈 때 재검증을 거칩니다.
+* Moving from on hold → active goes through re-verification.
 
-* I8은 Governed 등급의 요건으로 옮겼습니다. 서버가 없는 P1·P5는 Core 등급까지만 받습니다.
+* I8 moved to a requirement of the Governed level. P1 and P5, which have no server, can reach only the Core level.
 
-* Cedar 정책 엔진 어댑터를 추가하고, I5를 SymCC로 증명합니다. 사용자 권리 하한(F1\~F7)은 엔진보다 먼저 평가합니다.
+* Added a Cedar policy engine adapter, with I5 proved via SymCC. User floor rights (F1\~F7) are evaluated before the engine.
 
-### 참조 아키텍처 (5장)
+### Reference architecture (chapter 5)
 
-* `own` 가시성에서 생성자에게는 상위 레이어의 타입과 기능 지도만 줍니다(I6).
+* Under `own` visibility, the generator receives only the types and capability map of upper layers (I6).
 
-* 활성화는 PDP와 G5를 거칩니다. 승인 전 D4 코드는 권한 0으로만 마운트합니다.
+* Activation goes through the PDP and G5. D4 code is mounted only with zero permissions before approval.
 
-* G4: 출처 맹검 판정을 적용하고, 후보를 시드 기반 익명 id로 제시합니다.
+* G4: source-blind judging applies, and candidates are presented under seed-based anonymous ids.
 
-* G1: 실패하면 고칠 수 있는 이유를 돌려주고, 재시도한 뒤 현 상태를 유지합니다.
+* G1: on failure, returns a fixable reason and keeps the current state after retrying.
 
-* 하네스 이벤트 대응표를 추가했습니다. AG-UI, A2A, MCP `input_required`는 대응표를 넣었고, Codex는 공식 문서 확인이 필요합니다.
+* Added harness event mapping tables. AG-UI, A2A and MCP `input_required` have mapping tables; Codex needs confirmation against official documentation.
 
-* 훅 설정이 잘못되면 기본 허용 상태가 되는 문제를 경고했습니다. `Stop`/`SubagentStop` 훅은 막는 게이트가 아니라고 명시했습니다.
+* Warned that a misconfigured hook falls back to default-allow. Stated that `Stop`/`SubagentStop` hooks are not blocking gates.
 
-* 관측 필드를 OTel GenAI 이름으로 바꾸고, `policy.decision_id`와 `traceparent`를 추가했습니다.
+* Observability fields were renamed to OTel GenAI names, and `policy.decision_id` and `traceparent` were added.
 
-### 버전·신뢰·경험·사업 (6\~9장)
+### Versioning, trust, experience and business (chapters 6\~9)
 
-* 전파 알고리즘을 다시 썼습니다.
+* The propagation algorithm was rewritten.
 
-  * 경로 전체 계약의 합집합을 씁니다.
+  * It uses the union of the contracts along the whole path.
 
-  * 승인 대기 중인 부모가 자식을 멈추지 않습니다.
+  * A parent awaiting approval does not stall its children.
 
-  * 카나리는 시드 기반 무작위 표본입니다.
+  * Canaries are seed-based random samples.
 
-* 계약 약화는 사람의 명시적 동의가 있을 때만 허용하고, `Contract-Migrated`로 기록합니다.
+* Weakening a contract is allowed only with a person's explicit consent and is recorded as `Contract-Migrated`.
 
-* 정보 흐름 라벨에 무결성 축을 추가했습니다(FIDES).
+* An integrity axis was added to information-flow labels (FIDES).
 
-* 위협 3개를 추가했습니다: 계약·판정 오염, 해결 캐시 오염, 상위 릴리스·운영자 침해.
+* Three threats were added: contract and judgment poisoning, resolution cache poisoning, and compromise of upstream releases or the operator.
 
-* 게시자 서명을 in-toto/SLSA 형식으로 정했습니다.
+* Publisher signatures use the in-toto/SLSA format.
 
-* 비밀값은 MCP URL 모드 elicitation으로만 받습니다. MCP Sampling 위에 ModelPort를 올리지 않습니다.
+* Secrets are received only through MCP URL-mode elicitation. ModelPort is not built on top of MCP Sampling.
 
-* 고객 산출물은 옵트인과 라이선스 동의가 있어야 공식 기준판에 들어갑니다(B10·B19).
+* Customer artifacts enter the official baseline only with opt-in and license consent (B10, B19).
 
-### Mallang-Bench (10장)
+### Mallang-Bench (chapter 10)
 
-* 숨은 검사를 격리하고, 누출 감지 장치(트립와이어)를 둡니다.
+* Hidden checks are isolated, with leak-detection tripwires.
 
-* 판정에 실패한 항목은 미채점으로 보고하고 분모에서 뺍니다.
+* Items whose judging failed are reported as unscored and removed from the denominator.
 
-* 실행 조건을 함께 보고합니다: 네트워크 제한, 호출 수, 캐시 상태.
+* Run conditions are reported as well: network restrictions, call counts, cache state.
 
-* SBR 분모에 사람이 승인한 병합을 포함합니다.
+* The SBR denominator includes merges approved by a person.
 
-### 스키마 (`schemas/`, `tools/check_schemas.py` 신설)
+### Schemas (`schemas/`, new `tools/check_schemas.py`)
 
-* 계약 항목을 실행 가능한 형태(`tree-query`·`unit`·`snapshot`·`judge`)로 정의했습니다. 결정적 항목이 최소 1개 있어야 하고, `judge`는 비결정적이어야 합니다. 자유 서술 형식은 하위 호환용으로만 남깁니다.
+* Contract items are defined in executable form (`tree-query`, `unit`, `snapshot`, `judge`). At least one deterministic item is required, and `judge` must be non-deterministic. The free-text form remains only for backward compatibility.
 
-* 깊이별 필수 게이트를 정했습니다. 권한이 늘어나면 G5와 `approved_by`가 있어야 합니다.
+* Required gates per depth are defined. When permissions increase, G5 and `approved_by` are required.
 
-* 공백만 있는 의도문과 잘못된 id·날짜를 거부합니다.
+* Intent statements that are whitespace only, and invalid ids and dates, are rejected.
 
-* 추가 필드:
+* Added fields:
 
   * `provenance.harness_digest`
 
@@ -164,14 +178,14 @@ ThinkRail(JetBrains/thinkrail, Apache-2.0) 명세 문서를 조사해 반영했�
 
   * `destructive`
 
-* 정책 손잡이는 하한 ≤ 기본값 ≤ 상한을 지켜야 합니다.
+* Policy knobs must satisfy floor ≤ default ≤ ceiling.
 
-* manifest의 D1\~D3 산출물은 선언형만 허용합니다.
+* In a manifest, D1\~D3 artifacts may only be declarative.
 
-* 명세가 금지하는 문서 17개 가운데 15개를 스키마가 거부합니다. 나머지 2개는 문서 사이를 비교해야 하므로 검증기가 반드시 검사해야 한다고 명시했습니다.
+* Of the 17 documents the spec forbids, the schemas reject 15. The remaining 2 require comparison across documents, so the spec states that a validator **MUST** check them.
 
-### 참고 문헌
+### References
 
-* 2차 출처를 1차 출처로 바꿨습니다: Agent Skills 명세, 영어판 plugins 문서, A2UI v0.9.1, Mergiraf(GPL-3.0-only).
+* Secondary sources were replaced with primary ones: the Agent Skills specification, the English plugins documentation, A2UI v0.9.1, Mergiraf (GPL-3.0-only).
 
-* 새 절을 추가했습니다: 정책 엔진, 관측, 공급망, 하네스 개선과 평가.
+* New sections were added: policy engines, observability, supply chain, harness improvement and evaluation.

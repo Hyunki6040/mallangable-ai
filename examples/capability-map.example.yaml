@@ -1,5 +1,5 @@
-# 가상의 '할 일 앱' 호스트가 노출하는 기능 지도 예시 (명세 2.2, 2.10)
-# 스키마: schemas/capability-map.schema.json
+# Example capability map exposed by a hypothetical 'to-do app' host (spec 2.2, 2.10)
+# Schema: schemas/capability-map.schema.json
 host:
   id: todo-app
   version: "3.4.0"
@@ -10,39 +10,39 @@ extension_points:
     d_min: D1
     d_max: D1
     stability: stable
-    description: 색·글꼴·간격 디자인 토큰
+    description: Color, font and spacing design tokens
   - id: task.row.style
     kind: token
     d_min: D1
     d_max: D2
     stability: stable
-    description: "조건부 스타일 규칙 (예: 마감 지난 일 강조)"
+    description: "Conditional style rules (e.g. highlight overdue tasks)"
   - id: toolbar.command
     kind: command
     d_min: D2
     d_max: D2
     stability: stable
-    description: 기존 명령을 조합한 버튼·단축키
+    description: Buttons and shortcuts that combine existing commands
     merge:
-      /shortcuts: { strategy: map, keys: [key] }   # 양쪽이 단축키를 추가하면 키 단위로 합침 (6.6 R2)
+      /shortcuts: { strategy: map, keys: [key] }   # if both sides add shortcuts, merge per key (6.6 R2)
   - id: sidebar.panel
     kind: view
     d_min: D3
     d_max: D3
     stability: stable
-    description: 사이드바에 들어가는 선언형 패널
+    description: Declarative panel placed in the sidebar
   - id: task.on_complete
     kind: hook
     d_min: D4
     d_max: D4
     stability: experimental
-    description: 할 일이 완료될 때 실행되는 이벤트 훅
+    description: Event hook that runs when a task is completed
   - id: sync.server_action
     kind: service
     d_min: D4
     d_max: D4
     stability: experimental
-    description: 서버에서 실행되는 확장 지점. 비공개로 지켜야 할 로직은 여기에 둔다 (명세 7.8)
+    description: Extension point that runs on the server. Logic that must stay private goes here (spec 7.8)
 capabilities:
   - { id: tasks.read,     risk: read,      lexicon_id: cap_tasks_read }
   - { id: tasks.write,    risk: write,     lexicon_id: cap_tasks_write }
@@ -51,8 +51,8 @@ capabilities:
   - { id: people.read,    risk: sensitive, lexicon_id: cap_people_read }
 catalog_id: "https://todo.example/catalogs/v3"
 catalog:
-  - { component: list,    a11y: "항목마다 텍스트 라벨, 키보드 이동" }
-  - { component: card,    a11y: "제목 필수" }
-  - { component: chart,   a11y: "데이터 표 대체 텍스트 필수" }
-  - { component: button,  a11y: "라벨 필수, 대비 4.5:1 이상" }
-  - { component: toggle,  a11y: "상태를 텍스트로도 표시" }
+  - { component: list,    a11y: "Text label per item, keyboard navigation" }
+  - { component: card,    a11y: "Title required" }
+  - { component: chart,   a11y: "Data table alternative text required" }
+  - { component: button,  a11y: "Label required, contrast 4.5:1 or higher" }
+  - { component: toggle,  a11y: "Also show state as text" }

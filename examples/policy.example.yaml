@@ -1,6 +1,6 @@
-# 정책 사슬 예시: 운영자 요금제 → 테넌트 → 조직 (명세 4.2~4.9)
-# 스키마: schemas/policy.schema.json
-# 유효 정책 = 세 문서의 교집합. 하위는 상위보다 넓힐 수 없다 (I5).
+# Example policy chain: operator plan → tenant → org (spec 4.2~4.9)
+# Schema: schemas/policy.schema.json
+# Effective policy = intersection of the three documents. A child cannot be wider than its parent (I5).
 policy:
   id: operator/plan-business
   level: operator
@@ -12,7 +12,7 @@ policy:
     quality_tier:   { ceiling: high, default: standard }
     platform_export: { ceiling: V1 }
   floors: [rollback, safe_mode, visibility_notice, export_intents, permission_view, spend_cap, receipt]
-  notes: 비즈니스 요금제. 요금제도 정책 상한이다 (명세 9.7)
+  notes: Business plan. A pricing plan is also a policy ceiling (spec 9.7)
 ---
 policy:
   id: tenant/acme
@@ -40,7 +40,7 @@ policy:
   inherits: tenant/acme
   knobs:
     depth:          { ceiling: D3, default: D2 }
-    capabilities:   { ceiling: [tasks.read, tasks.write, notify.local] }   # 외부 전송 권한 제외 (더 엄격)
+    capabilities:   { ceiling: [tasks.read, tasks.write, notify.local] }   # external transmission capability excluded (stricter)
     sharing:        { ceiling: tenant, reshare: forbidden }
     baseline_apply: { ceiling: approve, default: approve }
   floors: [rollback, safe_mode, visibility_notice, export_intents, permission_view, spend_cap, receipt]

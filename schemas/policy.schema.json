@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mallangable.ai/schemas/v0.1/policy.schema.json",
-  "title": "Mallangable 정책 문서",
-  "description": "손잡이별 허용 구간(상한·기본값)과 사용자 권리 하한. 사슬 위 정책의 교집합이 유효 정책이다 (명세 2.7, 4.2~4.8).",
+  "title": "Mallangable Policy Document",
+  "description": "Allowed range per knob (ceiling, default) and floor rights. The intersection of the policies along the chain is the effective policy (spec 2.7, 4.2~4.8).",
   "type": "object",
   "required": ["policy"],
   "additionalProperties": false,
@@ -14,7 +14,7 @@
       "properties": {
         "id": { "type": "string" },
         "level": { "type": "string", "enum": ["vendor", "operator", "tenant", "org", "user"] },
-        "inherits": { "type": "string", "description": "상위 정책 id. 하위는 상위보다 넓힐 수 없다 (I5). 상위 문서와의 비교는 JSON Schema로 표현할 수 없으므로 준수 검사기가 반드시(MUST) 확인한다" },
+        "inherits": { "type": "string", "description": "Parent policy id. A child cannot be wider than its parent (I5). Comparison with the parent document cannot be expressed in JSON Schema, so the conformance validator MUST check it" },
         "knobs": {
           "type": "object",
           "additionalProperties": false,
@@ -27,7 +27,7 @@
               "additionalProperties": false,
               "properties": {
                 "ceiling": { "type": "string", "enum": ["deny", "allowlist", "any"] },
-                "allowlist": { "type": "array", "items": { "type": "string", "pattern": "^(\\*\\.)?([A-Za-z0-9-]+\\.)+[A-Za-z][A-Za-z0-9-]*$" }, "description": "확장 매니페스트 network.allow와 같은 호스트 형식. 매니페스트 호스트는 이 목록에 정확히 또는 하위 도메인 와일드카드로 포함되어야 한다(준수 검사기)" }
+                "allowlist": { "type": "array", "items": { "type": "string", "pattern": "^(\\*\\.)?([A-Za-z0-9-]+\\.)+[A-Za-z][A-Za-z0-9-]*$" }, "description": "Same host format as the extension manifest network.allow. Manifest hosts must be contained in this list either exactly or via a subdomain wildcard (conformance validator)" }
               }
             },
             "activation": {
@@ -72,7 +72,7 @@
         },
         "floors": {
           "type": "array",
-          "description": "사용자 권리 하한. 아래 7개는 모든 정책에 반드시 포함 (명세 4.6)",
+          "description": "Floor rights. Every policy MUST include all 7 below (spec 4.6)",
           "items": { "type": "string", "enum": ["rollback", "safe_mode", "visibility_notice", "export_intents", "permission_view", "spend_cap", "receipt"] },
           "allOf": [
             { "contains": { "const": "rollback" } },
@@ -160,7 +160,7 @@
       ]
     },
     "orderedKnob": {
-      "description": "구형 범용 순서 손잡이(하위 호환용). 현재 손잡이는 모두 값 영역을 고정한 전용 정의를 쓴다",
+      "description": "Legacy generic ordered knob (for backward compatibility). All current knobs use dedicated definitions with a fixed value domain",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -170,7 +170,7 @@
       }
     },
     "setKnob": {
-      "description": "default ⊆ ceiling 이어야 한다. 집합 포함은 JSON Schema로 표현할 수 없으므로 준수 검사기가 반드시(MUST) 확인한다",
+      "description": "default ⊆ ceiling is required. Set inclusion cannot be expressed in JSON Schema, so the conformance validator MUST check it",
       "type": "object",
       "additionalProperties": false,
       "properties": {

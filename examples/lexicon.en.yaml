@@ -1,0 +1,77 @@
+# English core lexicon pack + domain pack (education) example (spec 8.9)
+# Schema: schemas/lexicon-pack.schema.json
+pack:
+  id: mallang.core.en
+  version: "0.1.0"
+  domain: general
+locale: en
+concepts:
+  change:           { basic: what you changed, practitioner: change, developer: change, explain: what was changed in one go }
+  feature:          { basic: feature I made, practitioner: feature, developer: feature, explain: a bundle of changes made for the same purpose }
+  record:           { basic: save point, practitioner: record, developer: commit, explain: a point you can come back to any time }
+  branch:           { basic: trial version, practitioner: experiment branch, developer: branch, explain: a copy for trying things without touching the original }
+  merge:            { basic: combine, practitioner: merge, developer: merge, explain: joins two versions into one }
+  conflict:         { basic: overlapping part, practitioner: conflict, developer: conflict, explain: both sides changed the same place differently }
+  intent_conflict:  { basic: part that needs your choice, practitioner: intent conflict, developer: intent conflict, explain: both cannot be satisfied at the same time }
+  revert:           { basic: undo, practitioner: revert, developer: revert, explain: go back to the previous state }
+  baseline:         { basic: default edition, practitioner: baseline, developer: baseline (LTS), explain: the version everyone uses as a starting point }
+  baseline_official: { basic: official default edition, practitioner: official baseline, developer: official baseline }
+  baseline_tenant:  { basic: company default edition, practitioner: tenant baseline, developer: tenant baseline }
+  baseline_org:     { basic: team default edition, practitioner: org baseline, developer: org baseline }
+  release:          { basic: new default edition, practitioner: baseline release, developer: release, explain: a new default edition is out }
+  fork:             { basic: my copy, practitioner: fork, developer: fork, explain: my version that split off from the default edition }
+  extension_point:  { basic: place you can change, practitioner: extension point, developer: extension point, explain: a location where the app allows changes }
+  capability:       { basic: allowed scope, practitioner: permission, developer: capability, explain: the data and actions a feature may use }
+  sandbox:          { basic: safe space, practitioner: isolated runtime, developer: sandbox, explain: a place to try something first without affecting anything else }
+  validation:       { basic: check, practitioner: verification, developer: validation gates, explain: checks that it works as promised }
+  contract:         { basic: list of promises, practitioner: acceptance criteria, developer: contract, explain: what this feature must always keep }
+  diff:             { basic: what changed, practitioner: difference, developer: diff, explain: the difference between before and after }
+  activate:         { basic: apply, practitioner: activation, developer: activate, explain: actually turn it on }
+  preview:          { basic: preview, practitioner: preview, developer: preview }
+  safe_mode:        { basic: start in default mode, practitioner: safe mode, developer: safe mode, explain: start with all my changes turned off }
+  quarantine:       { basic: paused for now, practitioner: quarantine, developer: quarantine, explain: stops a feature that caused a problem }
+  depth:            { basic: how much it changes, practitioner: change depth, developer: depth D1-D5 }
+  depth_d1:         { basic: look, practitioner: appearance (D1), developer: D1 }
+  depth_d2:         { basic: combination, practitioner: composition (D2), developer: D2 }
+  depth_d3:         { basic: screen, practitioner: screen (D3), developer: D3 }
+  depth_d4:         { basic: behavior, practitioner: behavior (D4), developer: D4 }
+  policy_ceiling:   { basic: range your company allows, practitioner: policy ceiling, developer: policy ceiling }
+  canary:           { basic: apply in turns, practitioner: staged rollout, developer: canary rollout, explain: apply to some first and check for problems }
+  drift:            { basic: behind the default edition, practitioner: baseline drift, developer: drift }
+  subscribe_share:  { basic: keep getting updates, practitioner: subscription share, developer: subscribe share, explain: when the sender improves it you get an update suggestion too }
+  promotion:        { basic: adopted as an official feature, practitioner: promotion, developer: promotion }
+  audit_log:        { basic: activity history, practitioner: audit log, developer: audit log }
+  visibility:       { basic: what admins can see, practitioner: admin visibility, developer: visibility V0-V3 }
+  agent:            { basic: AI helper, practitioner: agent, developer: agent }
+  model:            { basic: AI engine, practitioner: model, developer: model }
+  api_key:          { basic: connection key, practitioner: API key, developer: API key, explain: a secret code for using the AI engine }
+  tokens:           { basic: usage, practitioner: token usage, developer: tokens }
+  route_quality:    { basic: quality mode, practitioner: model routing tier, developer: route tier }
+  receipt:          { basic: receipt, practitioner: change receipt, developer: change receipt }
+  badge_user_added: { basic: feature I added, practitioner: user extension, developer: user extension }
+  cap_tasks_read:   { basic: see tasks, practitioner: task read permission, developer: tasks.read }
+  cap_tasks_write:  { basic: change tasks, practitioner: task write permission, developer: tasks.write }
+  cap_notify_local: { basic: notify on my screen, practitioner: local notification permission, developer: notify.local }
+  cap_net_post:     { basic: send content outside, practitioner: external send permission, developer: net.*.post, caution: Information leaves the app. }
+  cap_people_read:  { basic: see other people's info, practitioner: member info read permission, developer: people.read, caution: This accesses other people's information. }
+lint:
+  basic_forbidden: [commit, branch, merge, rebase, fork, token, API, sandbox, diff, deploy, rollback, manifest, hook, repository, repo]
+  status_words:
+    understanding: Understanding
+    building: Building
+    checking: Checking
+    ready: Ready
+---
+# Domain pack: education. Extends the core pack and overrides only some concepts.
+pack:
+  id: mallang.education.en
+  version: "0.1.0"
+  extends: mallang.core.en
+  domain: education
+locale: en
+concepts:
+  feature:         { basic: my class tool, explain: a feature made to fit my class }
+  baseline_tenant: { basic: school default edition }
+  baseline_org:    { basic: grade default edition }
+  cap_people_read: { basic: see student info, caution: "This accesses students' personal information. Check your school's rules." }
+  subscribe_share: { basic: keep getting a fellow teacher's version }

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mallangable.ai/schemas/v0.1/lexicon-pack.schema.json",
-  "title": "Mallangable 용어팩 (Lexicon Pack)",
-  "description": "개념 id마다 수준(basic·practitioner·developer)·분야·언어별 표현을 정의한다. 경험면의 문자열과 에이전트의 사용자용 답변이 이 사전을 거친다 (명세 8.9).",
+  "title": "Mallangable Lexicon Pack",
+  "description": "Defines, per concept id, the wording by level (basic, practitioner, developer), domain and language. Experience-surface strings and the agent's user-facing answers go through this dictionary (spec 8.9).",
   "type": "object",
   "required": ["pack", "locale", "concepts"],
   "additionalProperties": false,
@@ -14,7 +14,7 @@
       "properties": {
         "id": { "type": "string" },
         "version": { "type": "string" },
-        "extends": { "type": "string", "description": "덮어쓸 기반 팩 id (분야 팩이 기본 팩을 확장)" },
+        "extends": { "type": "string", "description": "Id of the base pack to override (a domain pack extends the base pack)" },
         "domain": { "type": "string", "examples": ["general", "education", "healthcare", "enterprise"] }
       }
     },
@@ -28,10 +28,10 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "basic_forbidden": { "type": "array", "items": { "type": "string" }, "description": "basic 수준 화면·답변에 나오면 안 되는 단어" },
+        "basic_forbidden": { "type": "array", "items": { "type": "string" }, "description": "Words that must not appear in basic-level screens and answers" },
         "status_words": {
           "type": "object",
-          "description": "생성 진행 상태어 고정 (명세 8.5)",
+          "description": "Fixed status words for generation progress (spec 8.5)",
           "additionalProperties": false,
           "properties": {
             "understanding": { "type": "string" },
@@ -52,8 +52,8 @@
         "basic": { "type": "string" },
         "practitioner": { "type": "string" },
         "developer": { "type": "string" },
-        "explain": { "type": "string", "description": "basic 수준 한 줄 설명" },
-        "caution": { "type": "string", "description": "민감 분야에서 덧붙일 경고 문구" }
+        "explain": { "type": "string", "description": "One-line explanation at basic level" },
+        "caution": { "type": "string", "description": "Warning text to append in sensitive domains" }
       }
     }
   }

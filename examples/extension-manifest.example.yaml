@@ -1,5 +1,5 @@
-# 사이드바 '이번 주 완료한 일' 패널의 확장 매니페스트 예시 (명세 2.10)
-# 스키마: schemas/extension-manifest.schema.json
+# Example extension manifest for the sidebar 'completed this week' panel (spec 2.10)
+# Schema: schemas/extension-manifest.schema.json
 id: weekly-done-panel
 version: "1.0.0"
 feature: f_01JBX7K2M9Q2
